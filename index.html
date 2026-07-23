@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Reward Point - Katalog hadiah dan leaderboard bintang">
+    <meta name="theme-color" content="#4f46e5">
+    <title>Reward Point</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/images/favicon.png">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* ===== RESET ===== */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #eef1f6;
+            color: #1e293b;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        img { max-width: 100%; display: block; }
+        button { cursor: pointer; border: none; background: none; font-family: inherit; }
+        input, select { font-family: inherit; }
+        a { text-decoration: none; color: inherit; }
+        ul { list-style: none; }
+
+        /* ===== HEADER ===== */
+        .app-header {
+            background: #fff;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 14px 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-inner {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .header-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #f97316, #f59e0b);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 17px;
+        }
+
+        .header-title { font-size: 17px; font-weight: 700; color: #1e293b; }
+        .header-subtitle { font-size: 12px; color: #94a3b8; font-weight: 400; margin-top: 1px; }
+
+        .header-search {
+            flex: 1;
+            max-width: 520px;
+            position: relative;
+        }
+
+        .header-search i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .header-search input {
+            width: 100%;
+            padding: 10px 14px 10px 40px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #1e293b;
+            background: #f8fafc;
+            transition: all 0.2s;
+            outline: none;
+        }
+
+        .header-search input:focus {
+            border-color: #818cf8;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.12);
+        }
+
+        .header-search input::placeholder { color: #94a3b8; }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .sort-select {
+            padding: 9px 34px 9px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #475569;
+            background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2394a3b8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 12px center;
+            appearance: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .sort-select:focus { border-color: #818cf8; }
+
+        .admin-link {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            color: #94a3b8;
+            font-size: 14px;
+            transition: all 0.15s;
+        }
+
+        .admin-link:hover {
+            background: #f1f5f9;
+            color: #4f46e5;
+        }
+
+        .filter-toggle-btn {
+            display: none;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 14px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #475569;
+            font-weight: 500;
+            transition: background 0.15s;
+        }
+
+        .filter-toggle-btn:hover { background: #e2e8f0; }
+
+        /* ===== LAYOUT ===== */
+        .app-layout {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+            display: flex;
+            gap: 24px;
+            min-height: calc(100vh - 73px);
+        }
+
+        .sidebar {
+            width: 256px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            position: sticky;
+            top: 90px; /* Jarak dari atas */
+            align-self: flex-start;
+            max-height: calc(100vh - 110px); /* Kurangi tinggi agar tidak kepotong di bawah */
+            overflow-y: auto;
+            padding-bottom: 20px; /* Spasi di bawah saat discroll */
+        }
+
+        /* Custom scrollbar for sidebar */
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-track { background: transparent; }
+        .sidebar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+        .sidebar-card {
+            background: #fff;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            flex-shrink: 0; /* Prevents card from being squished */
+        }
+
+        .sidebar-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 18px 10px;
+        }
+
+        .sidebar-card-title { font-size: 14px; font-weight: 700; color: #1e293b; }
+
+        .sidebar-card-action {
+            font-size: 12px;
+            color: #94a3b8;
+            font-weight: 500;
+            cursor: pointer;
+            transition: color 0.15s;
+        }
+
+        .sidebar-card-action:hover { color: #6366f1; }
+
+        /* --- Leaderboard --- */
+        .leader-list { 
+            padding: 0 8px 12px;
+            max-height: 220px; /* Sengaja dibuat lebih pendek agar cepat bisa di-scroll */
+            overflow-y: auto;
+        }
+
+        .leader-list::-webkit-scrollbar { width: 4px; }
+        .leader-list::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
+
+        .leader-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 7px 8px;
+            border-radius: 8px;
+            transition: background 0.12s;
+        }
+
+        .leader-item:hover { background: #f8fafc; }
+
+        .leader-rank {
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 6px;
+            flex-shrink: 0;
+        }
+
+        .leader-rank.gold   { background: #fef3c7; color: #b45309; }
+        .leader-rank.silver { background: #f1f5f9; color: #475569; }
+        .leader-rank.bronze { background: #fed7aa; color: #c2410c; }
+        .leader-rank.normal { color: #94a3b8; background: transparent; }
+
+        .leader-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            object-fit: cover;
+            object-position: center;
+            display: block;
+            flex-shrink: 0;
+            background: #f1f5f9;
+        }
+
+        .leader-info { flex: 1; min-width: 0; }
+
+        .leader-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1e293b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.3;
+        }
+
+        .leader-pts {
+            font-size: 12px;
+            color: #f59e0b;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .leader-pts i { font-size: 9px; }
+
+        /* --- Filter --- */
+        .filter-section { padding: 0 18px 16px; }
+        .filter-section + .filter-section { border-top: 1px solid #f1f5f9; padding-top: 14px; }
+
+        .filter-label { font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.3px; }
+
+        .category-list { max-height: 220px; overflow-y: auto; }
+        .category-list::-webkit-scrollbar { width: 3px; }
+        .category-list::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 3px; }
+
+        .category-item {
+            padding: 7px 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.12s;
+        }
+
+        .category-item:hover { background: #f8fafc; color: #334155; }
+        .category-item.active { color: #4f46e5; font-weight: 600; }
+
+        .point-range { display: flex; gap: 8px; margin-bottom: 12px; }
+
+        .point-range input {
+            flex: 1;
+            padding: 8px 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 13px;
+            outline: none;
+            color: #334155;
+            width: 100%;
+            transition: border-color 0.15s;
+        }
+
+        .point-range input:focus { border-color: #818cf8; }
+
+        .filter-buttons { display: flex; gap: 8px; }
+
+        .btn-apply {
+            flex: 1;
+            padding: 8px 14px;
+            background: #4f46e5;
+            color: white;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            transition: background 0.15s;
+        }
+
+        .btn-apply:hover { background: #4338ca; }
+
+        .btn-clear {
+            padding: 8px 14px;
+            color: #64748b;
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: all 0.15s;
+        }
+
+        .btn-clear:hover { background: #f1f5f9; color: #334155; }
+
+        /* ===== MAIN CONTENT ===== */
+        .main-content { flex: 1; min-width: 0; }
+
+        .content-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .content-bar-title { font-size: 14px; font-weight: 600; color: #1e293b; }
+
+        .content-bar-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .content-bar-count { font-size: 13px; color: #94a3b8; }
+
+        .content-bar-reset {
+            font-size: 13px;
+            color: #6366f1;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.15s;
+        }
+
+        .content-bar-reset:hover { text-decoration: underline; }
+
+        /* --- Rewards Grid --- */
+        .rewards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(192px, 1fr));
+            gap: 14px;
+        }
+
+        .reward-card {
+            background: #fff;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+        }
+
+        .reward-card:hover {
+            border-color: #c7d2fe;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+            transform: translateY(-3px);
+        }
+
+        .reward-img {
+            width: 100%;
+            aspect-ratio: 1;
+            background: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .reward-img img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .reward-img .out-of-stock-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #ef4444;
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 4px;
+            letter-spacing: 0.3px;
+        }
+
+        .reward-body { padding: 14px; }
+
+        .reward-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
+
+        .reward-tag {
+            font-size: 11px;
+            font-weight: 500;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: #eef2ff;
+            color: #4338ca;
+            white-space: nowrap;
+        }
+
+        .reward-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 10px;
+            line-height: 1.45;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .reward-bottom {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .reward-points {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #f59e0b;
+        }
+
+        .reward-points i { font-size: 12px; color: #fbbf24; }
+
+        .reward-stock { font-size: 11px; color: #94a3b8; }
+        .reward-stock.low { color: #ef4444; font-weight: 600; }
+
+        /* --- Empty / Loading --- */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #94a3b8;
+            grid-column: 1 / -1;
+        }
+
+        .empty-state i { font-size: 44px; margin-bottom: 14px; opacity: 0.4; display: block; }
+        .empty-state p { font-size: 14px; }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .skeleton-card {
+            height: 280px;
+            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 12px;
+        }
+
+        .skeleton-leader {
+            height: 44px;
+            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 8px;
+            margin: 3px 8px;
+        }
+
+        .loaded-counter {
+            text-align: center;
+            padding: 24px 0 8px;
+            font-size: 12px;
+            color: #b0b8c8;
+        }
+
+        /* Card appear animation */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .reward-card { animation: fadeUp 0.35s ease both; }
+        .reward-card:nth-child(2)  { animation-delay: 0.04s; }
+        .reward-card:nth-child(3)  { animation-delay: 0.08s; }
+        .reward-card:nth-child(4)  { animation-delay: 0.12s; }
+        .reward-card:nth-child(5)  { animation-delay: 0.16s; }
+        .reward-card:nth-child(6)  { animation-delay: 0.20s; }
+        .reward-card:nth-child(7)  { animation-delay: 0.24s; }
+        .reward-card:nth-child(8)  { animation-delay: 0.28s; }
+        .reward-card:nth-child(9)  { animation-delay: 0.32s; }
+        .reward-card:nth-child(10) { animation-delay: 0.36s; }
+
+        /* ===== MOBILE LEADERBOARD ===== */
+        .mobile-leaderboard {
+            display: none;
+            margin-bottom: 16px;
+        }
+
+        .mobile-lb-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .mobile-lb-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .mobile-lb-scroll {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .mobile-lb-scroll::-webkit-scrollbar { height: 3px; }
+        .mobile-lb-scroll::-webkit-scrollbar-track { background: transparent; }
+        .mobile-lb-scroll::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 3px; }
+
+        .mobile-lb-card {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            min-width: 180px;
+            scroll-snap-align: start;
+            transition: border-color 0.15s;
+        }
+
+        .mobile-lb-card:first-child { border-color: #fde68a; background: linear-gradient(135deg, #fffbeb, #fff); }
+        .mobile-lb-card:nth-child(2) { border-color: #e2e8f0; background: linear-gradient(135deg, #f8fafc, #fff); }
+        .mobile-lb-card:nth-child(3) { border-color: #fed7aa; background: linear-gradient(135deg, #fff7ed, #fff); }
+
+        .mobile-lb-rank {
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .mobile-lb-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            object-position: center;
+            display: block;
+            flex-shrink: 0;
+            background: #f1f5f9;
+        }
+
+        .mobile-lb-info { min-width: 0; }
+
+        .mobile-lb-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1e293b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100px;
+            line-height: 1.3;
+        }
+
+        .mobile-lb-pts {
+            font-size: 12px;
+            font-weight: 600;
+            color: #f59e0b;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .mobile-lb-pts i { font-size: 10px; }
+
+        .mobile-lb-empty {
+            padding: 16px;
+            text-align: center;
+            color: #94a3b8;
+            font-size: 13px;
+            width: 100%;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1100px) {
+            .rewards-grid { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
+        }
+
+        @media (max-width: 768px) {
+            .app-header { padding: 12px 16px; }
+
+            .header-inner { flex-wrap: wrap; gap: 10px; }
+
+            .header-search {
+                order: 3;
+                max-width: 100%;
+                flex-basis: 100%;
+            }
+
+            .header-subtitle { display: none; }
+            .sort-select { display: none; }
+            .filter-toggle-btn { display: flex; }
+
+            .app-layout {
+                flex-direction: column;
+                padding: 16px;
+                gap: 16px;
+            }
+
+            .sidebar {
+                width: 100%;
+                position: static;
+                max-height: none;
+                display: none;
+            }
+
+            .sidebar.open { display: flex; }
+
+            /* Show mobile leaderboard */
+            .mobile-leaderboard { display: block; }
+
+            .rewards-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 10px;
+            }
+
+            .reward-img { padding: 14px; }
+            .reward-body { padding: 10px; }
+        }
+
+        @media (max-width: 480px) {
+            .rewards-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+            .reward-img { padding: 10px; }
+            .reward-body { padding: 8px; }
+            .reward-title { font-size: 12px; }
+            .reward-points { font-size: 13px; }
+            .mobile-lb-card { min-width: 160px; padding: 8px 12px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="app-header">
+        <div class="header-inner">
+            <div class="header-brand">
+                <div class="header-icon">
+                    <i class="fas fa-gift"></i>
+                </div>
+                <div>
+                    <div class="header-title">Reward Point</div>
+                    <div class="header-subtitle">Katalog hadiah untuk penukaran bintang</div>
+                </div>
+            </div>
+
+            <div class="header-search">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Cari hadiah, kategori, atau jenis...">
+            </div>
+
+            <div class="header-actions">
+                <a href="pages/admin/login.html" class="admin-link" title="Admin Panel">
+                    <i class="fas fa-user-shield"></i>
+                </a>
+                <select class="sort-select" id="sortSelect">
+                    <option value="newest">Terbaru</option>
+                    <option value="points_asc">Bintang Terendah</option>
+                    <option value="points_desc">Bintang Tertinggi</option>
+                </select>
+                <button class="filter-toggle-btn" id="filterToggle">
+                    <i class="fas fa-sliders-h"></i> Filter
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <!-- Leaderboard -->
+            <div class="sidebar-card">
+                <div class="sidebar-card-header">
+                    <h2 class="sidebar-card-title"><i class="fas fa-trophy" style="color: var(--color-secondary); margin-right: 8px;"></i>Top Bintang</h2>
+                </div>
+                <div class="leader-list" id="leaderboardList">
+                    <div class="skeleton-leader"></div>
+                    <div class="skeleton-leader"></div>
+                    <div class="skeleton-leader"></div>
+                    <div class="skeleton-leader"></div>
+                    <div class="skeleton-leader"></div>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="sidebar-card">
+                <div class="sidebar-card-header">
+                    <h3 class="sidebar-card-title">Filter</h3>
+                    <span class="sidebar-card-action" id="resetFilters">Reset</span>
+                </div>
+
+                <div class="filter-section">
+                    <div class="filter-label">Kategori</div>
+                    <ul class="category-list" id="categoryList">
+                        <li class="category-item active" data-category="all">Semua</li>
+                    </ul>
+                </div>
+
+                <div class="filter-section">
+                    <div class="filter-label">Rentang Bintang</div>
+                    <div class="point-range">
+                        <input type="number" id="pointMin" placeholder="Min">
+                        <input type="number" id="pointMax" placeholder="Max">
+                    </div>
+                    <div class="filter-buttons">
+                        <button class="btn-apply" id="applyRange">Terapkan</button>
+                        <button class="btn-clear" id="clearRange">Clear</button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Content -->
+        <main class="main-content">
+            <div class="content-bar">
+                <span class="content-bar-title" id="contentTitle">Semua hadiah</span>
+                <div class="content-bar-right">
+                    <span class="content-bar-count" id="rewardCount">Memuat...</span>
+                    <span class="content-bar-reset" id="resetAll" style="display:none;">Reset Filter</span>
+                </div>
+            </div>
+
+            <!-- Mobile Leaderboard (visible on mobile only) -->
+            <div class="mobile-leaderboard">
+                <div class="mobile-lb-header">
+                    <span class="mobile-lb-title"><i class="fas fa-trophy" style="color: var(--color-secondary); margin-right: 4px;"></i>Top Bintang</span>
+                </div>
+                <div class="mobile-lb-scroll" id="mobileLeaderboard">
+                    <div class="mobile-lb-empty">Memuat...</div>
+                </div>
+            </div>
+
+            <div class="rewards-grid" id="rewardsGrid">
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+            </div>
+
+            <div class="loaded-counter" id="loadedCounter"></div>
+        </main>
+    </div>
+
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- JavaScript -->
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>

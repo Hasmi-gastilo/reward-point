@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Anggota - Admin</title>
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <link rel="stylesheet" href="../../assets/css/components.css">
+    <link rel="stylesheet" href="../../assets/css/responsive.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { background: var(--color-bg-alt); }
+        .admin-layout { display: flex; min-height: 100vh; }
+        .admin-sidebar { width: 260px; background: var(--color-card); box-shadow: var(--shadow-md); 
+                        position: fixed; top: 0; left: 0; height: 100vh; overflow-y: auto; z-index: 1000; }
+        .sidebar-header { padding: var(--spacing-lg); border-bottom: 1px solid var(--color-bg-alt); }
+        .sidebar-brand { display: flex; align-items: center; gap: var(--spacing-sm); 
+                        font-size: var(--font-size-xl); font-weight: 700; color: var(--color-primary); }
+        .sidebar-menu { padding: var(--spacing-lg) 0; }
+        .menu-item { display: flex; align-items: center; gap: var(--spacing-md); 
+                    padding: var(--spacing-md) var(--spacing-lg); color: var(--color-text-secondary); 
+                    font-weight: 500; transition: var(--transition-fast); border-left: 3px solid transparent; }
+        .menu-item:hover { background: var(--color-bg-alt); color: var(--color-primary); }
+        .menu-item.active { background: var(--color-bg-alt); color: var(--color-primary); border-left-color: var(--color-primary); }
+        .menu-item i { width: 20px; text-align: center; }
+        .sidebar-footer { padding: var(--spacing-lg); border-top: 1px solid var(--color-bg-alt); }
+        .admin-main { flex: 1; margin-left: 260px; padding: var(--spacing-xl); min-width: 0; overflow-x: hidden; }
+        .admin-header { background: var(--color-card); padding: var(--spacing-lg) var(--spacing-xl); 
+                       border-radius: var(--border-radius-lg); margin-bottom: var(--spacing-xl); 
+                       display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-sm); }
+        .page-title { font-size: var(--font-size-2xl); font-weight: 700; }
+        .toolbar { background: var(--color-card); padding: var(--spacing-lg); border-radius: var(--border-radius); 
+                  margin-bottom: var(--spacing-lg); display: flex; justify-content: space-between; align-items: center; 
+                  flex-wrap: wrap; gap: var(--spacing-md); }
+
+        /* Point adjustment buttons */
+        .point-controls {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .point-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 12px;
+            color: #475569;
+            transition: all 0.15s;
+        }
+
+        .point-btn:hover {
+            background: var(--color-primary);
+            color: white;
+            border-color: var(--color-primary);
+        }
+
+        .point-btn.minus:hover {
+            background: var(--color-danger);
+            border-color: var(--color-danger);
+        }
+
+        .point-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            background: #f1f5f9;
+        }
+
+        .point-value {
+            min-width: 60px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--color-secondary);
+            font-size: 0.95rem;
+        }
+
+        .point-value i { margin-right: 3px; }
+
+        .point-value.updating {
+            opacity: 0.5;
+        }
+
+        /* Mobile Menu */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: var(--color-text-primary);
+            cursor: pointer;
+            padding: 8px;
+            z-index: 100;
+            position: relative;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar-overlay.show {
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-btn { display: block; }
+            .admin-sidebar { 
+                transform: translateX(-100%); 
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .admin-sidebar.open {
+                transform: translateX(0) !important;
+            }
+            .sidebar-overlay.show { display: block; opacity: 1; }
+            .admin-main { margin-left: 0; padding: var(--spacing-md); width: 100%; overflow-x: hidden; }
+            .admin-header { padding: 12px 16px; border-radius: 8px; }
+            .page-title { font-size: 18px; }
+            .toolbar { flex-direction: column; align-items: stretch; }
+            .search-box { max-width: 100% !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- Overlay -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <aside class="admin-sidebar" id="adminSidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-brand"><i class="fas fa-gift"></i><span>Reward Point</span></div>
+            </div>
+            <nav class="sidebar-menu">
+                <a href="dashboard.html" class="menu-item"><i class="fas fa-home"></i><span>Dashboard</span></a>
+                <a href="members.html" class="menu-item active"><i class="fas fa-users"></i><span>Kelola Anggota</span></a>
+                <a href="rewards.html" class="menu-item"><i class="fas fa-gift"></i><span>Kelola Hadiah</span></a>
+                <a href="categories.html" class="menu-item"><i class="fas fa-tags"></i><span>Kelola Kategori</span></a>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="btn btn-danger" id="logoutBtn" style="width: 100%;">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </aside>
+
+        <main class="admin-main">
+            <header class="admin-header">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <button class="mobile-menu-btn" id="mobileMenuBtn">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="page-title">Kelola Anggota</h1>
+                </div>
+                <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
+            </header>
+
+            <div class="toolbar">
+                <div class="search-box" style="max-width: 400px; flex: 1;">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Cari anggota...">
+                </div>
+                <button class="btn btn-primary" id="addMemberBtn">
+                    <i class="fas fa-plus"></i> Tambah Anggota
+                </button>
+            </div>
+
+            <div class="table-wrapper">
+                <table class="table" id="membersTable">
+                    <thead>
+                        <tr>
+                            <th>Foto</th>
+                            <th>Nomor Anggota</th>
+                            <th>Nama Lengkap</th>
+                            <th>Total Bintang</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="membersBody">
+                        <tr><td colspan="6" style="text-align: center;">
+                            <i class="fas fa-spinner fa-spin"></i> Memuat data...
+                        </td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination" id="pagination"></div>
+        </main>
+    </div>
+
+    <!-- Modal Form -->
+    <div class="modal" id="memberModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Tambah Anggota</h3>
+                <button class="modal-close" id="closeModal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="memberForm">
+                    <input type="hidden" id="memberId">
+                    <div class="form-group">
+                        <label class="form-label">Nama Lengkap *</label>
+                        <input type="text" class="form-control" id="fullname" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Foto Profil</label>
+                        <div class="file-upload">
+                            <input type="file" id="photoInput" accept="image/*">
+                            <label class="file-upload-label" for="photoInput">
+                                <i class="fas fa-cloud-upload-alt"></i> Pilih Foto
+                            </label>
+                        </div>
+                        <div class="file-preview" id="photoPreview" style="display: none;"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Status</label>
+                        <select class="form-control form-select" id="status">
+                            <option value="active">Aktif</option>
+                            <option value="inactive">Tidak Aktif</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelBtn">Batal</button>
+                <button class="btn btn-primary" id="saveBtn"><i class="fas fa-save"></i> Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module">
+        import authService from '../../js/services/auth.service.js';
+        import memberService from '../../js/services/member.service.js';
+        import { formatNumber, showToast, showConfirm, validateFile, getImagePreview, debounce } from '../../js/utils/helpers.js';
+
+        await authService.protectAdminPage();
+
+        let state = { currentPage: 1, perPage: 10, searchQuery: '', total: 0, editingId: null, uploadedPhotoUrl: null };
+
+        const elements = {
+            themeToggle: document.getElementById('themeToggle'),
+            logoutBtn: document.getElementById('logoutBtn'),
+            searchInput: document.getElementById('searchInput'),
+            addMemberBtn: document.getElementById('addMemberBtn'),
+            membersBody: document.getElementById('membersBody'),
+            pagination: document.getElementById('pagination'),
+            memberModal: document.getElementById('memberModal'),
+            modalTitle: document.getElementById('modalTitle'),
+            memberForm: document.getElementById('memberForm'),
+            closeModal: document.getElementById('closeModal'),
+            cancelBtn: document.getElementById('cancelBtn'),
+            saveBtn: document.getElementById('saveBtn'),
+            memberId: document.getElementById('memberId'),
+            fullname: document.getElementById('fullname'),
+            photoInput: document.getElementById('photoInput'),
+            photoPreview: document.getElementById('photoPreview'),
+            status: document.getElementById('status'),
+            
+            // Mobile Menu
+            mobileMenuBtn: document.getElementById('mobileMenuBtn'),
+            adminSidebar: document.getElementById('adminSidebar'),
+            sidebarOverlay: document.getElementById('sidebarOverlay')
+        };
+
+        // Mobile Menu Toggle
+        if (elements.mobileMenuBtn) {
+            elements.mobileMenuBtn.addEventListener('click', () => {
+                elements.adminSidebar.classList.add('open');
+                elements.sidebarOverlay.classList.add('show');
+            });
+        }
+
+        if (elements.sidebarOverlay) {
+            elements.sidebarOverlay.addEventListener('click', () => {
+                elements.adminSidebar.classList.remove('open');
+                elements.sidebarOverlay.classList.remove('show');
+            });
+        }
+
+        initTheme();
+        loadMembers();
+
+        elements.searchInput.addEventListener('input', debounce(() => {
+            state.searchQuery = elements.searchInput.value.trim();
+            state.currentPage = 1;
+            loadMembers();
+        }, 500));
+
+        elements.addMemberBtn.addEventListener('click', () => openModal());
+        elements.closeModal.addEventListener('click', closeModal);
+        elements.cancelBtn.addEventListener('click', closeModal);
+        elements.saveBtn.addEventListener('click', saveMember);
+        elements.logoutBtn.addEventListener('click', async () => {
+            if (await showConfirm('Yakin ingin logout?')) {
+                await authService.logout();
+                window.location.href = 'login.html';
+            }
+        });
+
+        elements.photoInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const validation = validateFile(file);
+            if (!validation.valid) {
+                showToast(validation.error, 'error');
+                e.target.value = '';
+                return;
+            }
+
+            const preview = await getImagePreview(file);
+            elements.photoPreview.innerHTML = `<img src="${preview}" alt="Preview">`;
+            elements.photoPreview.style.display = 'block';
+        });
+
+        function initTheme() {
+            const theme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', theme);
+            elements.themeToggle.querySelector('i').className = theme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+            elements.themeToggle.addEventListener('click', () => {
+                const current = document.documentElement.getAttribute('data-theme');
+                const newTheme = current === 'light' ? 'dark' : 'light';
+                document.documentElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                elements.themeToggle.querySelector('i').className = newTheme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+            });
+        }
+
+        async function loadMembers() {
+            elements.membersBody.innerHTML = '<tr><td colspan="6" style="text-align: center;"><i class="fas fa-spinner fa-spin"></i> Memuat...</td></tr>';
+
+            const result = await memberService.getAll({
+                search: state.searchQuery,
+                limit: state.perPage,
+                offset: (state.currentPage - 1) * state.perPage
+            });
+
+            if (result.success) {
+                state.total = result.total;
+                renderMembers(result.data);
+                renderPagination();
+            } else {
+                elements.membersBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Gagal memuat data</td></tr>';
+            }
+        }
+
+        function renderMembers(members) {
+            if (!members || members.length === 0) {
+                elements.membersBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Tidak ada data</td></tr>';
+                return;
+            }
+
+            elements.membersBody.innerHTML = members.map(m => `
+                <tr>
+                    <td><img src="${m.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(m.fullname)}&background=e2e8f0&color=475569`}" alt="${m.fullname}" 
+                             onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(m.fullname)}&background=e2e8f0&color=475569'"
+                             style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; display: block;"></td>
+                    <td>${m.member_number}</td>
+                    <td>${m.fullname}</td>
+                    <td>
+                        <div class="point-controls">
+                            <button class="point-btn minus" onclick="adjustPoint('${m.id}', -1)" title="Kurangi 1 bintang">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <span class="point-value" id="points-${m.id}">
+                                <i class="fas fa-star"></i> ${formatNumber(m.total_point)}
+                            </span>
+                            <button class="point-btn plus" onclick="adjustPoint('${m.id}', 1)" title="Tambah 1 bintang">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-${m.status === 'active' ? 'success' : 'secondary'}">${m.status === 'active' ? 'Aktif' : 'Nonaktif'}</span></td>
+                    <td>
+                        <button class="btn-icon btn-primary" onclick="editMember('${m.id}')" title="Edit">
+                            <i class="fas fa-edit"></i></button>
+                        <button class="btn-icon btn-danger" onclick="deleteMember('${m.id}')" title="Hapus">
+                            <i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderPagination() {
+            const totalPages = Math.ceil(state.total / state.perPage);
+            if (totalPages <= 1) { elements.pagination.innerHTML = ''; return; }
+            
+            let html = `<button class="page-btn" ${state.currentPage === 1 ? 'disabled' : ''} onclick="changePage(${state.currentPage - 1})">
+                <i class="fas fa-chevron-left"></i></button>`;
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= state.currentPage - 1 && i <= state.currentPage + 1)) {
+                    html += `<button class="page-btn ${i === state.currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
+                } else if (i === state.currentPage - 2 || i === state.currentPage + 2) {
+                    html += `<span style="padding: 0.5rem;">...</span>`;
+                }
+            }
+            html += `<button class="page-btn" ${state.currentPage === totalPages ? 'disabled' : ''} onclick="changePage(${state.currentPage + 1})">
+                <i class="fas fa-chevron-right"></i></button>`;
+            elements.pagination.innerHTML = html;
+        }
+
+        window.changePage = (page) => { state.currentPage = page; loadMembers(); };
+
+        function openModal(id = null) {
+            state.editingId = id;
+            state.uploadedPhotoUrl = null;
+            elements.modalTitle.textContent = id ? 'Edit Anggota' : 'Tambah Anggota';
+            elements.memberForm.reset();
+            elements.photoPreview.style.display = 'none';
+            
+            if (id) {
+                memberService.getById(id).then(result => {
+                    if (result.success) {
+                        const m = result.data;
+                        elements.memberId.value = m.id;
+                        elements.fullname.value = m.fullname;
+                        elements.status.value = m.status;
+                        if (m.photo) {
+                            elements.photoPreview.innerHTML = `<img src="${m.photo}" alt="Current">`;
+                            elements.photoPreview.style.display = 'block';
+                            state.uploadedPhotoUrl = m.photo;
+                        }
+                    }
+                });
+            }
+            
+            elements.memberModal.classList.add('show');
+        }
+
+        function closeModal() { elements.memberModal.classList.remove('show'); }
+
+        async function saveMember() {
+            if (!elements.memberForm.checkValidity()) { elements.memberForm.reportValidity(); return; }
+
+            elements.saveBtn.disabled = true;
+            elements.saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+
+            try {
+                let photoUrl = state.uploadedPhotoUrl;
+                
+                if (elements.photoInput.files.length > 0) {
+                    const uploadResult = await memberService.uploadPhoto(elements.photoInput.files[0], state.editingId || Date.now().toString());
+                    if (uploadResult.success) photoUrl = uploadResult.url;
+                }
+
+                const memberData = {
+                    fullname: elements.fullname.value.trim(),
+                    photo: photoUrl,
+                    status: elements.status.value
+                };
+
+                const result = state.editingId 
+                    ? await memberService.update(state.editingId, memberData)
+                    : await memberService.create(memberData);
+
+                if (result.success) {
+                    showToast(state.editingId ? 'Anggota berhasil diupdate' : 'Anggota berhasil ditambahkan', 'success');
+                    closeModal();
+                    loadMembers();
+                } else {
+                    showToast(result.error || 'Gagal menyimpan', 'error');
+                }
+            } catch (error) {
+                showToast('Terjadi kesalahan', 'error');
+            }
+
+            elements.saveBtn.disabled = false;
+            elements.saveBtn.innerHTML = '<i class="fas fa-save"></i> Simpan';
+        }
+
+        window.editMember = (id) => openModal(id);
+
+        window.adjustPoint = async (id, delta) => {
+            // Get current member data
+            const memberResult = await memberService.getById(id);
+            if (!memberResult.success) {
+                showToast('Gagal mengambil data anggota', 'error');
+                return;
+            }
+
+            const currentPoints = memberResult.data.total_point || 0;
+            const newPoints = Math.max(0, currentPoints + delta);
+
+            // Show updating state
+            const pointEl = document.getElementById(`points-${id}`);
+            if (pointEl) pointEl.classList.add('updating');
+
+            // Update in database
+            const result = await memberService.update(id, { total_point: newPoints });
+
+            if (result.success) {
+                // Update UI instantly
+                if (pointEl) {
+                    pointEl.innerHTML = `<i class="fas fa-star"></i> ${formatNumber(newPoints)}`;
+                    pointEl.classList.remove('updating');
+                }
+                showToast(`Bintang ${delta > 0 ? 'ditambah' : 'dikurangi'}: ${memberResult.data.fullname} → ${formatNumber(newPoints)}`, 'success');
+            } else {
+                if (pointEl) pointEl.classList.remove('updating');
+                showToast(result.error || 'Gagal mengubah bintang', 'error');
+            }
+        };
+
+        window.deleteMember = async (id) => {
+            if (!await showConfirm('Yakin ingin menghapus anggota ini?')) return;
+            
+            const result = await memberService.delete(id);
+            if (result.success) {
+                showToast('Anggota berhasil dihapus', 'success');
+                loadMembers();
+            } else {
+                showToast(result.error || 'Gagal menghapus', 'error');
+            }
+        };
+    </script>
+</body>
+</html>

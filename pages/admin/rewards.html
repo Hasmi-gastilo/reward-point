@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Hadiah - Admin</title>
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <link rel="stylesheet" href="../../assets/css/components.css">
+    <link rel="stylesheet" href="../../assets/css/responsive.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { background: var(--color-bg-alt); }
+        .admin-layout { display: flex; min-height: 100vh; }
+        .admin-sidebar { width: 260px; background: var(--color-card); box-shadow: var(--shadow-md); 
+                        position: fixed; top: 0; left: 0; height: 100vh; overflow-y: auto; z-index: 1000; }
+        .sidebar-header { padding: var(--spacing-lg); border-bottom: 1px solid var(--color-bg-alt); }
+        .sidebar-brand { display: flex; align-items: center; gap: var(--spacing-sm); 
+                        font-size: var(--font-size-xl); font-weight: 700; color: var(--color-primary); }
+        .sidebar-menu { padding: var(--spacing-lg) 0; }
+        .menu-item { display: flex; align-items: center; gap: var(--spacing-md); 
+                    padding: var(--spacing-md) var(--spacing-lg); color: var(--color-text-secondary); 
+                    font-weight: 500; transition: var(--transition-fast); border-left: 3px solid transparent; }
+        .menu-item:hover { background: var(--color-bg-alt); color: var(--color-primary); }
+        .menu-item.active { background: var(--color-bg-alt); color: var(--color-primary); border-left-color: var(--color-primary); }
+        .menu-item i { width: 20px; text-align: center; }
+        .sidebar-footer { padding: var(--spacing-lg); border-top: 1px solid var(--color-bg-alt); }
+        .admin-main { flex: 1; margin-left: 260px; padding: var(--spacing-xl); min-width: 0; overflow-x: hidden; }
+        .admin-header { background: var(--color-card); padding: var(--spacing-lg) var(--spacing-xl); 
+                       border-radius: var(--border-radius-lg); margin-bottom: var(--spacing-xl); 
+                       display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-sm); }
+        .page-title { font-size: var(--font-size-2xl); font-weight: 700; }
+        .toolbar { background: var(--color-card); padding: var(--spacing-lg); border-radius: var(--border-radius); 
+                  margin-bottom: var(--spacing-lg); display: flex; justify-content: space-between; align-items: center; 
+                  flex-wrap: wrap; gap: var(--spacing-md); }
+        .rewards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--spacing-md); }
+        .rewards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--spacing-md); }
+        
+        /* Toolbar Styling */
+        .filter-select {
+            appearance: none;
+            background: #fff url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") no-repeat right 1rem center/1em;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 10px 2.5rem 10px 1rem;
+            font-size: 0.95rem;
+            color: var(--color-text-primary);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            transition: all 0.2s ease;
+            cursor: pointer;
+            line-height: normal;
+        }
+        .filter-select:hover { border-color: #cbd5e1; }
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        .search-box {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            transition: all 0.2s ease;
+            margin-bottom: 0;
+        }
+        .search-box:hover { border-color: #cbd5e1; }
+        .search-box:focus-within {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        .search-box input {
+            border: none;
+            background: transparent;
+            width: 100%;
+            flex: 1;
+            font-size: 0.95rem;
+            outline: none;
+            color: var(--color-text-primary);
+            padding: 0;
+            margin: 0;
+            line-height: normal;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+        .search-box i { color: #64748b; }
+        
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: var(--color-text-primary);
+            cursor: pointer;
+            padding: 8px;
+            z-index: 100;
+            position: relative;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar-overlay.show {
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-btn { display: block; }
+            .admin-sidebar { 
+                transform: translateX(-100%); 
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .admin-sidebar.open {
+                transform: translateX(0) !important;
+            }
+            .sidebar-overlay.show { display: block; opacity: 1; }
+            .admin-main { margin-left: 0; padding: var(--spacing-md); width: 100%; overflow-x: hidden; }
+            .admin-header { padding: 12px 16px; border-radius: 8px; flex-wrap: wrap; gap: 12px; }
+            .page-title { font-size: 18px; }
+            .toolbar { flex-direction: column; align-items: stretch; }
+            .toolbar-filters { flex-direction: column !important; width: 100%; align-items: stretch !important; }
+            .toolbar-filters > * { max-width: 100% !important; width: 100% !important; flex: none !important; }
+            #addRewardBtn { width: 100%; }
+            .rewards-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--spacing-sm); }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- Overlay -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <aside class="admin-sidebar" id="adminSidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-brand"><i class="fas fa-gift"></i><span>Reward Point</span></div>
+            </div>
+            <nav class="sidebar-menu">
+                <a href="dashboard.html" class="menu-item"><i class="fas fa-home"></i><span>Dashboard</span></a>
+                <a href="members.html" class="menu-item"><i class="fas fa-users"></i><span>Kelola Anggota</span></a>
+                <a href="rewards.html" class="menu-item active"><i class="fas fa-gift"></i><span>Kelola Hadiah</span></a>
+                <a href="categories.html" class="menu-item"><i class="fas fa-tags"></i><span>Kelola Kategori</span></a>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="btn btn-danger" id="logoutBtn" style="width: 100%;">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </aside>
+
+        <main class="admin-main">
+            <header class="admin-header">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <button class="mobile-menu-btn" id="mobileMenuBtn">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="page-title">Kelola Hadiah</h1>
+                </div>
+                <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
+            </header>
+
+            <div class="toolbar">
+                <div class="toolbar-filters" style="display: flex; gap: 1rem; flex: 1; flex-wrap: wrap; align-items: center;">
+                    <div class="search-box" style="max-width: 300px; flex: 1;">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="Cari hadiah...">
+                    </div>
+                    <select class="filter-select" id="categoryFilter" style="max-width: 200px; flex: 1;">
+                        <option value="">Semua Kategori</option>
+                    </select>
+                    <select class="filter-select" id="statusFilter" style="max-width: 150px; flex: 1;">
+                        <option value="">Semua Status</option>
+                        <option value="active">Aktif</option>
+                        <option value="inactive">Nonaktif</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" id="addRewardBtn">
+                    <i class="fas fa-plus"></i> Tambah Hadiah
+                </button>
+            </div>
+
+            <div class="rewards-grid" id="rewardsGrid">
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+            </div>
+
+            <div class="pagination" id="pagination"></div>
+        </main>
+    </div>
+
+    <!-- Modal Form -->
+    <div class="modal" id="rewardModal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Tambah Hadiah</h3>
+                <button class="modal-close" id="closeModal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="rewardForm">
+                    <input type="hidden" id="rewardId">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label class="form-label">Judul Hadiah *</label>
+                            <input type="text" class="form-control" id="title" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Kategori *</label>
+                            <select class="form-control form-select" id="category" required>
+                                <option value="">Pilih Kategori</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Bintang Diperlukan *</label>
+                            <input type="number" class="form-control" id="pointRequired" min="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Stok *</label>
+                            <input type="number" class="form-control" id="stock" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Status *</label>
+                            <select class="form-control form-select" id="status">
+                                <option value="active">Aktif</option>
+                                <option value="inactive">Nonaktif</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label class="form-label">Deskripsi</label>
+                            <textarea class="form-control" id="description" rows="3"></textarea>
+                        </div>
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label class="form-label">Gambar Hadiah</label>
+                            <div class="file-upload">
+                                <input type="file" id="imageInput" accept="image/*">
+                                <label class="file-upload-label" for="imageInput">
+                                    <i class="fas fa-cloud-upload-alt"></i> Pilih Gambar
+                                </label>
+                            </div>
+                            <div class="file-preview" id="imagePreview" style="display: none;"></div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelBtn">Batal</button>
+                <button class="btn btn-primary" id="saveBtn"><i class="fas fa-save"></i> Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module">
+        import authService from '../../js/services/auth.service.js';
+        import rewardService from '../../js/services/reward.service.js';
+        import categoryService from '../../js/services/category.service.js';
+        import { formatNumber, showToast, showConfirm, validateFile, getImagePreview, debounce } from '../../js/utils/helpers.js';
+
+        await authService.protectAdminPage();
+
+        let state = { 
+            currentPage: 1, 
+            perPage: 12, 
+            searchQuery: '', 
+            categoryFilter: '',
+            statusFilter: '',
+            total: 0, 
+            editingId: null, 
+            uploadedImageUrl: null,
+            categories: []
+        };
+
+        const elements = {
+            themeToggle: document.getElementById('themeToggle'),
+            logoutBtn: document.getElementById('logoutBtn'),
+            searchInput: document.getElementById('searchInput'),
+            categoryFilter: document.getElementById('categoryFilter'),
+            statusFilter: document.getElementById('statusFilter'),
+            addRewardBtn: document.getElementById('addRewardBtn'),
+            rewardsGrid: document.getElementById('rewardsGrid'),
+            pagination: document.getElementById('pagination'),
+            rewardModal: document.getElementById('rewardModal'),
+            modalTitle: document.getElementById('modalTitle'),
+            rewardForm: document.getElementById('rewardForm'),
+            closeModal: document.getElementById('closeModal'),
+            cancelBtn: document.getElementById('cancelBtn'),
+            saveBtn: document.getElementById('saveBtn'),
+            rewardId: document.getElementById('rewardId'),
+            title: document.getElementById('title'),
+            category: document.getElementById('category'),
+            pointRequired: document.getElementById('pointRequired'),
+            stock: document.getElementById('stock'),
+            status: document.getElementById('status'),
+            description: document.getElementById('description'),
+            imageInput: document.getElementById('imageInput'),
+            imagePreview: document.getElementById('imagePreview'),
+            
+            // Mobile Menu
+            mobileMenuBtn: document.getElementById('mobileMenuBtn'),
+            adminSidebar: document.getElementById('adminSidebar'),
+            sidebarOverlay: document.getElementById('sidebarOverlay')
+        };
+
+        // Mobile Menu Toggle
+        if (elements.mobileMenuBtn) {
+            elements.mobileMenuBtn.addEventListener('click', () => {
+                elements.adminSidebar.classList.add('open');
+                elements.sidebarOverlay.classList.add('show');
+            });
+        }
+
+        if (elements.sidebarOverlay) {
+            elements.sidebarOverlay.addEventListener('click', () => {
+                elements.adminSidebar.classList.remove('open');
+                elements.sidebarOverlay.classList.remove('show');
+            });
+        }
+
+        initTheme();
+        loadCategories();
+        loadRewards();
+
+        elements.searchInput.addEventListener('input', debounce(() => {
+            state.searchQuery = elements.searchInput.value.trim();
+            state.currentPage = 1;
+            loadRewards();
+        }, 500));
+
+        elements.categoryFilter.addEventListener('change', () => {
+            state.categoryFilter = elements.categoryFilter.value;
+            state.currentPage = 1;
+            loadRewards();
+        });
+
+        elements.statusFilter.addEventListener('change', () => {
+            state.statusFilter = elements.statusFilter.value;
+            state.currentPage = 1;
+            loadRewards();
+        });
+
+        elements.addRewardBtn.addEventListener('click', () => openModal());
+        elements.closeModal.addEventListener('click', closeModal);
+        elements.cancelBtn.addEventListener('click', closeModal);
+        elements.saveBtn.addEventListener('click', saveReward);
+        elements.logoutBtn.addEventListener('click', async () => {
+            if (await showConfirm('Yakin ingin logout?')) {
+                await authService.logout();
+                window.location.href = 'login.html';
+            }
+        });
+
+        elements.imageInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const validation = validateFile(file);
+            if (!validation.valid) {
+                showToast(validation.error, 'error');
+                e.target.value = '';
+                return;
+            }
+
+            const preview = await getImagePreview(file);
+            elements.imagePreview.innerHTML = `<img src="${preview}" alt="Preview">`;
+            elements.imagePreview.style.display = 'block';
+        });
+
+        function initTheme() {
+            const theme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', theme);
+            elements.themeToggle.querySelector('i').className = theme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+            elements.themeToggle.addEventListener('click', () => {
+                const current = document.documentElement.getAttribute('data-theme');
+                const newTheme = current === 'light' ? 'dark' : 'light';
+                document.documentElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                elements.themeToggle.querySelector('i').className = newTheme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+            });
+        }
+
+        async function loadCategories() {
+            const result = await categoryService.getAll();
+            if (result.success) {
+                state.categories = result.data;
+                renderCategoryOptions();
+            }
+        }
+
+        function renderCategoryOptions() {
+            const options = state.categories.map(cat => 
+                `<option value="${cat.id}">${cat.name}</option>`
+            ).join('');
+            
+            elements.category.innerHTML = '<option value="">Pilih Kategori</option>' + options;
+            elements.categoryFilter.innerHTML = '<option value="">Semua Kategori</option>' + options;
+        }
+
+        async function loadRewards() {
+            elements.rewardsGrid.innerHTML = '<div class="skeleton-card"></div>'.repeat(3);
+
+            const options = {
+                search: state.searchQuery,
+                limit: state.perPage,
+                offset: (state.currentPage - 1) * state.perPage
+            };
+
+            if (state.categoryFilter) options.category_id = state.categoryFilter;
+            if (state.statusFilter) options.status = state.statusFilter;
+
+            const result = await rewardService.getAll(options);
+
+            if (result.success) {
+                state.total = result.total;
+                renderRewards(result.data);
+                renderPagination();
+            } else {
+                elements.rewardsGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">Gagal memuat data</p>';
+            }
+        }
+
+        function renderRewards(rewards) {
+            if (!rewards || rewards.length === 0) {
+                elements.rewardsGrid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1/-1;">
+                        <i class="fas fa-box-open"></i>
+                        <h3>Tidak Ada Hadiah</h3>
+                        <p>Belum ada hadiah yang ditambahkan</p>
+                    </div>`;
+                return;
+            }
+
+            elements.rewardsGrid.innerHTML = rewards.map(r => `
+                <div class="reward-card">
+                    <div class="reward-image-container">
+                        <img src="${r.image || '../../assets/images/default-reward.png'}" 
+                             alt="${r.title}" class="reward-image">
+                    </div>
+                    ${r.stock <= 0 ? '<span class="reward-badge out-of-stock">STOK HABIS</span>' : ''}
+                    <div class="reward-content">
+                        <span class="reward-category">
+                            <i class="fas ${r.categories?.icon || 'fa-tag'}"></i>
+                            ${r.categories?.name || 'Uncategorized'}
+                        </span>
+                        <h3 class="reward-title">${r.title}</h3>
+                        <div class="reward-footer">
+                            <div class="reward-points">
+                                <i class="fas fa-star"></i>
+                                ${formatNumber(r.point_required)}
+                            </div>
+                            <span class="reward-stock ${r.stock <= 5 && r.stock > 0 ? 'low-stock' : ''}">
+                                Stok: ${r.stock}
+                            </span>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                            <span class="badge badge-${r.status === 'active' ? 'success' : 'secondary'}" style="flex: 1; justify-content: center;">
+                                ${r.status === 'active' ? 'Aktif' : 'Nonaktif'}
+                            </span>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-primary btn-sm" onclick="editReward('${r.id}')" style="flex: 1;" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteReward('${r.id}')" style="flex: 1;" title="Hapus">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderPagination() {
+            const totalPages = Math.ceil(state.total / state.perPage);
+            if (totalPages <= 1) { elements.pagination.innerHTML = ''; return; }
+            
+            let html = `<button class="page-btn" ${state.currentPage === 1 ? 'disabled' : ''} onclick="changePage(${state.currentPage - 1})">
+                <i class="fas fa-chevron-left"></i></button>`;
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= state.currentPage - 1 && i <= state.currentPage + 1)) {
+                    html += `<button class="page-btn ${i === state.currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
+                } else if (i === state.currentPage - 2 || i === state.currentPage + 2) {
+                    html += `<span style="padding: 0.5rem;">...</span>`;
+                }
+            }
+            html += `<button class="page-btn" ${state.currentPage === totalPages ? 'disabled' : ''} onclick="changePage(${state.currentPage + 1})">
+                <i class="fas fa-chevron-right"></i></button>`;
+            elements.pagination.innerHTML = html;
+        }
+
+        window.changePage = (page) => { state.currentPage = page; loadRewards(); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+
+        function openModal(id = null) {
+            state.editingId = id;
+            state.uploadedImageUrl = null;
+            elements.modalTitle.textContent = id ? 'Edit Hadiah' : 'Tambah Hadiah';
+            elements.rewardForm.reset();
+            elements.imagePreview.style.display = 'none';
+            
+            if (id) {
+                rewardService.getById(id).then(result => {
+                    if (result.success) {
+                        const r = result.data;
+                        elements.rewardId.value = r.id;
+                        elements.title.value = r.title;
+                        elements.category.value = r.category_id || '';
+                        elements.pointRequired.value = r.point_required;
+                        elements.stock.value = r.stock;
+                        elements.status.value = r.status;
+                        elements.description.value = r.description || '';
+                        if (r.image) {
+                            elements.imagePreview.innerHTML = `<img src="${r.image}" alt="Current">`;
+                            elements.imagePreview.style.display = 'block';
+                            state.uploadedImageUrl = r.image;
+                        }
+                    }
+                });
+            }
+            
+            elements.rewardModal.classList.add('show');
+        }
+
+        function closeModal() { elements.rewardModal.classList.remove('show'); }
+
+        async function saveReward() {
+            if (!elements.rewardForm.checkValidity()) { elements.rewardForm.reportValidity(); return; }
+
+            elements.saveBtn.disabled = true;
+            elements.saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+
+            try {
+                let imageUrl = state.uploadedImageUrl;
+                
+                if (elements.imageInput.files.length > 0) {
+                    const uploadResult = await rewardService.uploadImage(elements.imageInput.files[0], state.editingId || Date.now().toString());
+                    if (uploadResult.success) imageUrl = uploadResult.url;
+                }
+
+                const rewardData = {
+                    title: elements.title.value.trim(),
+                    category_id: elements.category.value,
+                    point_required: parseInt(elements.pointRequired.value),
+                    stock: parseInt(elements.stock.value),
+                    status: elements.status.value,
+                    description: elements.description.value.trim(),
+                    image: imageUrl
+                };
+
+                const result = state.editingId 
+                    ? await rewardService.update(state.editingId, rewardData)
+                    : await rewardService.create(rewardData);
+
+                if (result.success) {
+                    showToast(state.editingId ? 'Hadiah berhasil diupdate' : 'Hadiah berhasil ditambahkan', 'success');
+                    closeModal();
+                    loadRewards();
+                } else {
+                    showToast(result.error || 'Gagal menyimpan', 'error');
+                }
+            } catch (error) {
+                showToast('Terjadi kesalahan', 'error');
+            }
+
+            elements.saveBtn.disabled = false;
+            elements.saveBtn.innerHTML = '<i class="fas fa-save"></i> Simpan';
+        }
+
+        window.editReward = (id) => openModal(id);
+
+        window.deleteReward = async (id) => {
+            if (!await showConfirm('Yakin ingin menghapus hadiah ini?')) return;
+            
+            const result = await rewardService.delete(id);
+            if (result.success) {
+                showToast('Hadiah berhasil dihapus', 'success');
+                loadRewards();
+            } else {
+                showToast(result.error || 'Gagal menghapus', 'error');
+            }
+        };
+    </script>
+</body>
+</html>

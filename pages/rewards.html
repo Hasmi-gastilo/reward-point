@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Daftar hadiah yang dapat ditukar dengan bintang">
+    <title>Daftar Hadiah - Reward Point</title>
+    
+    <link rel="icon" type="image/png" href="../assets/images/favicon.png">
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="../assets/css/components.css">
+    <link rel="stylesheet" href="../assets/css/responsive.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <div class="nav-wrapper">
+                <div class="nav-brand">
+                    <img src="../assets/images/logo.png" alt="Logo" class="nav-logo">
+                    <span class="nav-title">Reward Point</span>
+                </div>
+                
+                <div class="nav-menu" id="navMenu">
+                    <a href="../index.html" class="nav-link">Beranda</a>
+                    <a href="rewards.html" class="nav-link active">Hadiah</a>
+                    <a href="leaderboard.html" class="nav-link">Leaderboard</a>
+                    <a href="about.html" class="nav-link">Tentang</a>
+                    <a href="contact.html" class="nav-link">Kontak</a>
+                    <a href="admin/login.html" class="nav-link nav-admin">
+                        <i class="fas fa-user-shield"></i> Admin
+                    </a>
+                </div>
+                
+                <div class="nav-actions">
+                    <button class="theme-toggle" id="themeToggle">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <button class="nav-toggle" id="navToggle">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <section class="section" style="padding-top: 100px;">
+        <div class="container">
+            <div class="section-header" style="flex-direction: column; align-items: center; text-align: center;">
+                <h1 class="section-title" style="font-size: 2.5rem;">
+                    <i class="fas fa-gift"></i> Daftar Hadiah
+                </h1>
+                <p style="color: var(--color-text-secondary); max-width: 600px;">
+                    Tukarkan bintang Anda dengan berbagai hadiah menarik yang tersedia
+                </p>
+            </div>
+
+            <!-- Search & Filter -->
+            <div style="margin-bottom: 2rem;">
+                <div class="search-box" style="max-width: 600px; margin: 0 auto 2rem;">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Cari hadiah...">
+                </div>
+
+                <!-- Category Filter -->
+                <div class="category-filter" id="categoryFilter">
+                    <button class="category-btn active" data-category="all">
+                        <i class="fas fa-th"></i> Semua
+                    </button>
+                </div>
+            </div>
+
+            <!-- Rewards Grid -->
+            <div class="rewards-grid" id="rewardsGrid">
+                <!-- Loading -->
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination" id="pagination"></div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3 class="footer-title">Reward Point</h3>
+                    <p class="footer-description">
+                        Platform reward point yang memudahkan Anda menukarkan bintang dengan hadiah menarik.
+                    </p>
+                </div>
+                
+                <div class="footer-section">
+                    <h4 class="footer-subtitle">Menu</h4>
+                    <ul class="footer-links">
+                        <li><a href="../index.html">Beranda</a></li>
+                        <li><a href="rewards.html">Hadiah</a></li>
+                        <li><a href="leaderboard.html">Leaderboard</a></li>
+                        <li><a href="about.html">Tentang</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4 class="footer-subtitle">Kontak</h4>
+                    <ul class="footer-links">
+                        <li><i class="fas fa-envelope"></i> info@rewardpoint.com</li>
+                        <li><i class="fas fa-phone"></i> +62 812-3456-7890</li>
+                        <li><i class="fas fa-map-marker-alt"></i> Jakarta, Indonesia</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2026 Reward Point. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Back to Top -->
+    <button class="back-to-top" id="backToTop">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- Reward Detail Modal -->
+    <div class="modal" id="rewardModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Detail Hadiah</h3>
+                <button class="modal-close" id="closeModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Content loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module">
+        import rewardService from '../js/services/reward.service.js';
+        import categoryService from '../js/services/category.service.js';
+        import { formatNumber, debounce, showToast } from '../js/utils/helpers.js';
+
+        // State
+        let state = {
+            currentPage: 1,
+            perPage: 12,
+            selectedCategory: 'all',
+            searchQuery: '',
+            totalRewards: 0
+        };
+
+        // DOM Elements
+        const elements = {
+            navbar: document.getElementById('navbar'),
+            navToggle: document.getElementById('navToggle'),
+            navMenu: document.getElementById('navMenu'),
+            themeToggle: document.getElementById('themeToggle'),
+            backToTop: document.getElementById('backToTop'),
+            categoryFilter: document.getElementById('categoryFilter'),
+            searchInput: document.getElementById('searchInput'),
+            rewardsGrid: document.getElementById('rewardsGrid'),
+            pagination: document.getElementById('pagination'),
+            rewardModal: document.getElementById('rewardModal'),
+            modalBody: document.getElementById('modalBody'),
+            closeModal: document.getElementById('closeModal')
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            initNavbar();
+            initBackToTop();
+            loadCategories();
+            loadRewards();
+            initSearch();
+            initModal();
+        });
+
+        // Theme
+        function initTheme() {
+            const theme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', theme);
+            updateThemeIcon();
+            elements.themeToggle.addEventListener('click', toggleTheme);
+        }
+
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme');
+            const newTheme = current === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon();
+        }
+
+        function updateThemeIcon() {
+            const theme = document.documentElement.getAttribute('data-theme');
+            elements.themeToggle.querySelector('i').className = theme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+        }
+
+        // Navbar
+        function initNavbar() {
+            elements.navToggle.addEventListener('click', () => {
+                elements.navMenu.classList.toggle('active');
+                elements.navToggle.classList.toggle('active');
+            });
+
+            window.addEventListener('scroll', () => {
+                elements.navbar.classList.toggle('scrolled', window.scrollY > 100);
+            });
+        }
+
+        // Back to Top
+        function initBackToTop() {
+            window.addEventListener('scroll', () => {
+                elements.backToTop.classList.toggle('show', window.scrollY > 300);
+            });
+
+            elements.backToTop.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        }
+
+        // Load Categories
+        async function loadCategories() {
+            const result = await categoryService.getAll();
+            if (result.success) {
+                renderCategories(result.data);
+            }
+        }
+
+        function renderCategories(categories) {
+            const allBtn = `<button class="category-btn active" data-category="all">
+                <i class="fas fa-th"></i> Semua
+            </button>`;
+
+            const categoryBtns = categories.map(cat => `
+                <button class="category-btn" data-category="${cat.id}">
+                    <i class="fas ${cat.icon}"></i> ${cat.name}
+                </button>
+            `).join('');
+
+            elements.categoryFilter.innerHTML = allBtn + categoryBtns;
+
+            // Event listeners
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    state.selectedCategory = e.target.dataset.category;
+                    state.currentPage = 1;
+                    loadRewards();
+                });
+            });
+        }
+
+        // Search
+        function initSearch() {
+            const debouncedSearch = debounce(() => {
+                state.searchQuery = elements.searchInput.value.trim();
+                state.currentPage = 1;
+                loadRewards();
+            }, 500);
+
+            elements.searchInput.addEventListener('input', debouncedSearch);
+        }
+
+        // Load Rewards
+        async function loadRewards() {
+            elements.rewardsGrid.innerHTML = '<div class="skeleton-card"></div>'.repeat(4);
+
+            const options = {
+                status: 'active',
+                limit: state.perPage,
+                offset: (state.currentPage - 1) * state.perPage
+            };
+
+            if (state.selectedCategory !== 'all') {
+                options.category_id = state.selectedCategory;
+            }
+
+            if (state.searchQuery) {
+                options.search = state.searchQuery;
+            }
+
+            const result = await rewardService.getAll(options);
+
+            if (result.success) {
+                state.totalRewards = result.total;
+                renderRewards(result.data);
+                renderPagination();
+            } else {
+                elements.rewardsGrid.innerHTML = '<p class="text-center">Gagal memuat hadiah</p>';
+            }
+        }
+
+        function renderRewards(rewards) {
+            if (!rewards || rewards.length === 0) {
+                elements.rewardsGrid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1 / -1;">
+                        <i class="fas fa-box-open"></i>
+                        <h3>Tidak Ada Hadiah</h3>
+                        <p>Belum ada hadiah yang tersedia saat ini</p>
+                    </div>`;
+                return;
+            }
+
+            elements.rewardsGrid.innerHTML = rewards.map(reward => `
+                <div class="reward-card" data-id="${reward.id}">
+                    <div class="reward-image-container">
+                        <img src="${reward.image || '../assets/images/default-reward.png'}" 
+                             alt="${reward.title}" 
+                             class="reward-image">
+                        ${reward.stock <= 0 ? '<span class="reward-badge out-of-stock">STOK HABIS</span>' : ''}
+                    </div>
+                    <div class="reward-content">
+                        <span class="reward-category">
+                            <i class="fas ${reward.categories?.icon || 'fa-tag'}"></i>
+                            ${reward.categories?.name || 'Uncategorized'}
+                        </span>
+                        <h3 class="reward-title">${reward.title}</h3>
+                        <div class="reward-footer">
+                            <div class="reward-points">
+                                <i class="fas fa-star"></i>
+                                ${formatNumber(reward.point_required)}
+                            </div>
+                            <span class="reward-stock ${reward.stock <= 5 && reward.stock > 0 ? 'low-stock' : ''}">
+                                Stok: ${reward.stock}
+                            </span>
+                        </div>
+                        <button class="btn btn-primary" style="width: 100%; margin-top: 0.75rem;" onclick="showRewardDetail('${reward.id}')">
+                            <i class="fas fa-info-circle"></i> Detail
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Pagination
+        function renderPagination() {
+            const totalPages = Math.ceil(state.totalRewards / state.perPage);
+            
+            if (totalPages <= 1) {
+                elements.pagination.innerHTML = '';
+                return;
+            }
+
+            let paginationHTML = '';
+
+            // Previous
+            paginationHTML += `
+                <button class="page-btn" ${state.currentPage === 1 ? 'disabled' : ''} 
+                        onclick="changePage(${state.currentPage - 1})">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            `;
+
+            // Pages
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= state.currentPage - 1 && i <= state.currentPage + 1)) {
+                    paginationHTML += `
+                        <button class="page-btn ${i === state.currentPage ? 'active' : ''}" 
+                                onclick="changePage(${i})">${i}</button>
+                    `;
+                } else if (i === state.currentPage - 2 || i === state.currentPage + 2) {
+                    paginationHTML += `<span style="padding: 0.5rem;">...</span>`;
+                }
+            }
+
+            // Next
+            paginationHTML += `
+                <button class="page-btn" ${state.currentPage === totalPages ? 'disabled' : ''} 
+                        onclick="changePage(${state.currentPage + 1})">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            `;
+
+            elements.pagination.innerHTML = paginationHTML;
+        }
+
+        window.changePage = function(page) {
+            state.currentPage = page;
+            loadRewards();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        // Modal
+        function initModal() {
+            elements.closeModal.addEventListener('click', closeModal);
+            elements.rewardModal.addEventListener('click', (e) => {
+                if (e.target === elements.rewardModal) closeModal();
+            });
+        }
+
+        function closeModal() {
+            elements.rewardModal.classList.remove('show');
+        }
+
+        window.showRewardDetail = async function(id) {
+            elements.rewardModal.classList.add('show');
+            elements.modalBody.innerHTML = '<p class="text-center"><i class="fas fa-spinner fa-spin"></i> Loading...</p>';
+
+            const result = await rewardService.getById(id);
+
+            if (result.success) {
+                const reward = result.data;
+                elements.modalBody.innerHTML = `
+                    <img src="${reward.image || '../assets/images/default-reward.png'}" 
+                         alt="${reward.title}"
+                         style="width: 100%; height: 300px; object-fit: cover; border-radius: 12px; margin-bottom: 1.5rem;">
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <span class="badge badge-primary">
+                            <i class="fas ${reward.categories?.icon || 'fa-tag'}"></i>
+                            ${reward.categories?.name || 'Uncategorized'}
+                        </span>
+                        ${reward.stock <= 0 ? '<span class="badge badge-danger">STOK HABIS</span>' : ''}
+                        ${reward.stock > 0 && reward.stock <= 5 ? '<span class="badge badge-warning">STOK TERBATAS</span>' : ''}
+                    </div>
+
+                    <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">${reward.title}</h3>
+                    
+                    <p style="color: var(--color-text-secondary); margin-bottom: 1.5rem; line-height: 1.6;">
+                        ${reward.description || 'Tidak ada deskripsi'}
+                    </p>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; padding: 1rem; background: var(--color-bg-alt); border-radius: 12px;">
+                        <div>
+                            <p style="color: var(--color-text-muted); font-size: 0.875rem; margin-bottom: 0.25rem;">Bintang Diperlukan</p>
+                            <p style="font-size: 1.5rem; font-weight: 700; color: var(--color-secondary);">
+                                <i class="fas fa-star"></i> ${formatNumber(reward.point_required)}
+                            </p>
+                        </div>
+                        <div>
+                            <p style="color: var(--color-text-muted); font-size: 0.875rem; margin-bottom: 0.25rem;">Stok Tersedia</p>
+                            <p style="font-size: 1.5rem; font-weight: 700; color: ${reward.stock > 0 ? 'var(--color-success)' : 'var(--color-danger)'};">
+                                ${reward.stock} Item
+                            </p>
+                        </div>
+                    </div>
+
+                    ${reward.stock > 0 ? `
+                        <div class="alert alert-info" style="margin-top: 1.5rem;">
+                            <i class="fas fa-info-circle"></i>
+                            Hubungi admin untuk melakukan penukaran hadiah ini
+                        </div>
+                    ` : ''}
+                `;
+            } else {
+                elements.modalBody.innerHTML = '<p class="text-center">Gagal memuat detail hadiah</p>';
+            }
+        };
+    </script>
+</body>
+</html>
