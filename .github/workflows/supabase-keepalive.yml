@@ -1,0 +1,16 @@
+name: Supabase Keep Alive
+on:
+  schedule:
+    # Berjalan setiap 3 hari sekali pada jam 00:00 UTC
+    - cron: '0 0 */3 * *'
+  workflow_dispatch: # Memungkinkan untuk dijalankan secara manual
+
+jobs:
+  ping-supabase:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase Database
+        run: |
+          curl -s -X GET 'https://vwjewsddkxdjvjmcaktz.supabase.co/rest/v1/categories?select=id&limit=1' \
+          -H 'apikey: sb_publishable_GTbY7-R8tCiY-vD_UWTjDg_myVmAh0l' \
+          -H 'Authorization: Bearer sb_publishable_GTbY7-R8tCiY-vD_UWTjDg_myVmAh0l'
