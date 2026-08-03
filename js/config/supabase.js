@@ -7,7 +7,7 @@
 
 // Supabase credentials
 const SUPABASE_URL = 'https://vwjewsddkxdjvjmcaktz.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_slumtfwctkcncOd-lqvEsw_PU3ZkGWp'; // ⚠️ GANTI DENGAN KEY BARU SETELAH RESET!
+const SUPABASE_ANON_KEY = 'sb_publishable_GTbY7-R8tCiY-vD_UWTjDg_myVmAh0l'; // ⚠️ GANTI DENGAN KEY BARU SETELAH RESET!
 
 // Initialize Supabase client
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
