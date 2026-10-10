@@ -7,7 +7,7 @@
 
 // Supabase credentials
 const SUPABASE_URL = 'https://vwjewsddkxdjvjmcaktz.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_GTbY7-R8tCiY-vD_UWTjDg_myVmAh0l'; // ⚠️ GANTI DENGAN KEY BARU SETELAH RESET!
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ3amV3c2Rka3hkanZqbWNha3R6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ3NzUzODcsImV4cCI6MjEwMDM1MTM4N30.UvOqiavmHjWKRJgYNh_1VEOyUDI_c_rnh6PrnL35HT0'; // ✅ Telah diperbarui menggunakan Anon Key JWT
 
 // Initialize Supabase client
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {

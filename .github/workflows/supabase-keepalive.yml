@@ -12,5 +12,5 @@ jobs:
       - name: Ping Supabase Database
         run: |
           curl -s -X GET 'https://vwjewsddkxdjvjmcaktz.supabase.co/rest/v1/categories?select=id&limit=1' \
-          -H 'apikey: sb_publishable_GTbY7-R8tCiY-vD_UWTjDg_myVmAh0l' \
-          -H 'Authorization: Bearer sb_publishable_GTbY7-R8tCiY-vD_UWTjDg_myVmAh0l'
+          -H 'apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ3amV3c2Rka3hkanZqbWNha3R6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ3NzUzODcsImV4cCI6MjEwMDM1MTM4N30.UvOqiavmHjWKRJgYNh_1VEOyUDI_c_rnh6PrnL35HT0' \
+          -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ3amV3c2Rka3hkanZqbWNha3R6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ3NzUzODcsImV4cCI6MjEwMDM1MTM4N30.UvOqiavmHjWKRJgYNh_1VEOyUDI_c_rnh6PrnL35HT0'
