@@ -4,11 +4,14 @@
  * ============================================
  * Leaderboard sidebar + reward catalog with
  * search, sort, category & point-range filters
+ * + Banner Carousel + Products Section
  */
 
 import memberService from './services/member.service.js';
 import rewardService from './services/reward.service.js';
 import categoryService from './services/category.service.js';
+import bannerService from './services/banner.service.js';
+import productService from './services/product.service.js';
 import { formatNumber } from './utils/helpers.js';
 
 // ============================================
@@ -31,13 +34,19 @@ const els = {
     clearRange: document.getElementById('clearRange'),
     filterToggle: document.getElementById('filterToggle'),
     sidebar: document.getElementById('sidebar'),
-    mobileLeaderboard: document.getElementById('mobileLeaderboard')
+    mobileLeaderboard: document.getElementById('mobileLeaderboard'),
+    bannerTrack: document.getElementById('bannerTrack'),
+    bannerDots: document.getElementById('bannerDots'),
+    productsGrid: document.getElementById('productsGrid')
 };
 
 // ============================================
 // State
 // ============================================
 let allRewards = [];
+let bannerSlides = [];
+let currentBannerIndex = 0;
+let bannerTimer = null;
 
 const state = {
     search: '',
@@ -54,6 +63,8 @@ document.addEventListener('DOMContentLoaded', () => {
     loadLeaderboard();
     loadCategories();
     loadAllRewards();
+    loadBanners();
+    loadProducts();
     setupEventListeners();
 });
 
@@ -104,6 +115,12 @@ function setupEventListeners() {
             ? '<i class="fas fa-times"></i> Tutup'
             : '<i class="fas fa-sliders-h"></i> Filter';
     });
+
+    // Banner prev/next buttons
+    const prevBtn = document.getElementById('bannerPrev');
+    const nextBtn = document.getElementById('bannerNext');
+    if (prevBtn) prevBtn.addEventListener('click', () => moveBanner(-1));
+    if (nextBtn) nextBtn.addEventListener('click', () => moveBanner(1));
 }
 
 function resetAllFilters() {
@@ -123,6 +140,86 @@ function resetAllFilters() {
     });
 
     applyFilters();
+}
+
+// ============================================
+// Banner Carousel
+// ============================================
+async function loadBanners() {
+    if (!els.bannerTrack) return;
+    try {
+        const result = await bannerService.getActive();
+        if (result.success && result.data && result.data.length > 0) {
+            bannerSlides = result.data;
+            renderBanners(bannerSlides);
+        } else {
+            // Sembunyikan section banner jika tidak ada data
+            const bannerSection = document.getElementById('bannerSection');
+            if (bannerSection) bannerSection.style.display = 'none';
+        }
+    } catch (error) {
+        console.error('Banner error:', error);
+        const bannerSection = document.getElementById('bannerSection');
+        if (bannerSection) bannerSection.style.display = 'none';
+    }
+}
+
+function renderBanners(banners) {
+    // Render slides
+    els.bannerTrack.innerHTML = banners.map((b, i) => `
+        <div class="banner-slide ${i === 0 ? 'active' : ''}" data-index="${i}">
+            <img src="${b.image}" alt="${b.title || 'Banner'}" onerror="this.parentElement.style.background='linear-gradient(135deg,#4f46e5,#7c3aed)'">
+            ${b.title ? `<div class="banner-caption">${b.title}</div>` : ''}
+        </div>
+    `).join('');
+
+    // Render dots
+    if (els.bannerDots && banners.length > 1) {
+        els.bannerDots.innerHTML = banners.map((_, i) => `
+            <button class="banner-dot ${i === 0 ? 'active' : ''}" data-index="${i}" aria-label="Slide ${i + 1}"></button>
+        `).join('');
+
+        els.bannerDots.querySelectorAll('.banner-dot').forEach(dot => {
+            dot.addEventListener('click', () => goToBanner(parseInt(dot.dataset.index)));
+        });
+    } else if (els.bannerDots) {
+        els.bannerDots.innerHTML = '';
+    }
+
+    // Hide controls if only 1 banner
+    if (banners.length <= 1) {
+        const controls = document.querySelectorAll('#bannerPrev, #bannerNext');
+        controls.forEach(c => c.style.display = 'none');
+    }
+
+    // Start auto-slide
+    if (banners.length > 1) startBannerTimer();
+}
+
+function goToBanner(index) {
+    const slides = els.bannerTrack.querySelectorAll('.banner-slide');
+    const dots = els.bannerDots ? els.bannerDots.querySelectorAll('.banner-dot') : [];
+
+    slides.forEach(s => s.classList.remove('active'));
+    dots.forEach(d => d.classList.remove('active'));
+
+    currentBannerIndex = (index + bannerSlides.length) % bannerSlides.length;
+    if (slides[currentBannerIndex]) slides[currentBannerIndex].classList.add('active');
+    if (dots[currentBannerIndex]) dots[currentBannerIndex].classList.add('active');
+}
+
+function moveBanner(direction) {
+    clearTimeout(bannerTimer);
+    goToBanner(currentBannerIndex + direction);
+    startBannerTimer();
+}
+
+function startBannerTimer() {
+    clearTimeout(bannerTimer);
+    bannerTimer = setTimeout(() => {
+        goToBanner(currentBannerIndex + 1);
+        startBannerTimer();
+    }, 4000);
 }
 
 // ============================================
@@ -171,14 +268,14 @@ function renderLeaderboard(members) {
     // Mobile horizontal scroll
     if (els.mobileLeaderboard) {
         els.mobileLeaderboard.innerHTML = members.map((m, i) => {
-            const rankEmoji = i === 0 ? '<i class="fas fa-crown" style="color: #FFD700; font-size: 1.2em;"></i>' : 
-                              i === 1 ? '<i class="fas fa-medal" style="color: #C0C0C0; font-size: 1.2em;"></i>' : 
-                              i === 2 ? '<i class="fas fa-medal" style="color: #CD7F32; font-size: 1.2em;"></i>' : 
+            const rankEmoji = i === 0 ? '<i class="fas fa-crown" style="color: #FFD700; font-size: 1.2em;"></i>' :
+                              i === 1 ? '<i class="fas fa-medal" style="color: #C0C0C0; font-size: 1.2em;"></i>' :
+                              i === 2 ? '<i class="fas fa-medal" style="color: #CD7F32; font-size: 1.2em;"></i>' :
                               `#${i + 1}`;
             return `
             <div class="mobile-lb-card">
                 <div class="mobile-lb-rank">${rankEmoji}</div>
-                <img class="mobile-lb-avatar" 
+                <img class="mobile-lb-avatar"
                      src="${m.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(m.fullname)}&background=e2e8f0&color=475569`}"
                      alt="${m.fullname}"
                      onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(m.fullname)}&background=e2e8f0&color=475569'">
@@ -243,6 +340,50 @@ async function loadAllRewards() {
         els.rewardCount.textContent = '';
         els.loadedCounter.textContent = '';
     }
+}
+
+// ============================================
+// Products (Lapis 3)
+// ============================================
+async function loadProducts() {
+    if (!els.productsGrid) return;
+    try {
+        const result = await productService.getActive();
+        if (result.success && result.data && result.data.length > 0) {
+            renderProducts(result.data);
+        } else {
+            // Sembunyikan section jika tidak ada data
+            const productSection = document.getElementById('productSection');
+            if (productSection) productSection.style.display = 'none';
+        }
+    } catch (error) {
+        console.error('Products error:', error);
+        const productSection = document.getElementById('productSection');
+        if (productSection) productSection.style.display = 'none';
+    }
+}
+
+function renderProducts(products) {
+    els.productsGrid.innerHTML = products.map(p => `
+        <div class="product-card">
+            <div class="product-icon-wrap">
+                ${p.image
+                    ? `<img src="${p.image}" alt="${p.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+                    : ''
+                }
+                <div class="product-icon-fallback" style="${p.image ? 'display:none' : ''}">
+                    <i class="fas fa-box-open"></i>
+                </div>
+            </div>
+            <div class="product-info">
+                <div class="product-name">${p.name}</div>
+                <div class="product-earn">
+                    <i class="fas fa-star"></i>
+                    +${formatNumber(p.point_earned)} bintang
+                </div>
+            </div>
+        </div>
+    `).join('');
 }
 
 // ============================================

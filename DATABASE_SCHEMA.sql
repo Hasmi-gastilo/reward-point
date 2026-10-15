@@ -91,6 +91,18 @@ CREATE TABLE banners (
 );
 
 -- ============================================
+-- TABLE: products (Lapis 3: Produk Penghasil Poin)
+-- ============================================
+CREATE TABLE products (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL,
+    image TEXT,
+    point_earned INTEGER NOT NULL DEFAULT 0,
+    status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'inactive')),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- ============================================
 -- TABLE: settings
 -- ============================================
 CREATE TABLE settings (
@@ -187,13 +199,15 @@ ALTER TABLE rewards ENABLE ROW LEVEL SECURITY;
 ALTER TABLE point_history ENABLE ROW LEVEL SECURITY;
 ALTER TABLE redeem_history ENABLE ROW LEVEL SECURITY;
 ALTER TABLE banners ENABLE ROW LEVEL SECURITY;
+ALTER TABLE products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE settings ENABLE ROW LEVEL SECURITY;
 
--- Policy: Public can read members, rewards, categories, banners, settings
+-- Policy: Public can read members, rewards, categories, banners, products, settings
 CREATE POLICY "Public read members" ON members FOR SELECT USING (true);
 CREATE POLICY "Public read rewards" ON rewards FOR SELECT USING (true);
 CREATE POLICY "Public read categories" ON categories FOR SELECT USING (true);
 CREATE POLICY "Public read banners" ON banners FOR SELECT USING (status = 'active');
+CREATE POLICY "Public read products" ON products FOR SELECT USING (status = 'active');
 CREATE POLICY "Public read settings" ON settings FOR SELECT USING (true);
 
 -- Policy: Only authenticated users (admin) can modify
@@ -203,6 +217,7 @@ CREATE POLICY "Admin full access categories" ON categories FOR ALL USING (auth.r
 CREATE POLICY "Admin full access point_history" ON point_history FOR ALL USING (auth.role() = 'authenticated');
 CREATE POLICY "Admin full access redeem_history" ON redeem_history FOR ALL USING (auth.role() = 'authenticated');
 CREATE POLICY "Admin full access banners" ON banners FOR ALL USING (auth.role() = 'authenticated');
+CREATE POLICY "Admin full access products" ON products FOR ALL USING (auth.role() = 'authenticated');
 CREATE POLICY "Admin full access settings" ON settings FOR ALL USING (auth.role() = 'authenticated');
 
 -- ============================================

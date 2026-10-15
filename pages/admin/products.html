@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Produk - Admin</title>
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <link rel="stylesheet" href="../../assets/css/components.css">
+    <link rel="stylesheet" href="../../assets/css/responsive.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { background: var(--color-bg-alt); }
+        .admin-layout { display: flex; min-height: 100vh; }
+        .admin-sidebar { width: 260px; background: var(--color-card); box-shadow: var(--shadow-md);
+                        position: fixed; top: 0; left: 0; height: 100vh; overflow-y: auto; z-index: 1000; }
+        .sidebar-header { padding: var(--spacing-lg); border-bottom: 1px solid var(--color-bg-alt); }
+        .sidebar-brand { display: flex; align-items: center; gap: var(--spacing-sm);
+                        font-size: var(--font-size-xl); font-weight: 700; color: var(--color-primary); }
+        .sidebar-menu { padding: var(--spacing-lg) 0; }
+        .menu-item { display: flex; align-items: center; gap: var(--spacing-md);
+                    padding: var(--spacing-md) var(--spacing-lg); color: var(--color-text-secondary);
+                    font-weight: 500; transition: var(--transition-fast); border-left: 3px solid transparent; }
+        .menu-item:hover { background: var(--color-bg-alt); color: var(--color-primary); }
+        .menu-item.active { background: var(--color-bg-alt); color: var(--color-primary); border-left-color: var(--color-primary); }
+        .menu-item i { width: 20px; text-align: center; }
+        .sidebar-footer { padding: var(--spacing-lg); border-top: 1px solid var(--color-bg-alt); }
+        .admin-main { flex: 1; margin-left: 260px; padding: var(--spacing-xl); min-width: 0; overflow-x: hidden; }
+        .admin-header { background: var(--color-card); padding: var(--spacing-lg) var(--spacing-xl);
+                       border-radius: var(--border-radius-lg); margin-bottom: var(--spacing-xl);
+                       display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-sm); }
+        .page-title { font-size: var(--font-size-2xl); font-weight: 700; }
+        .toolbar { background: var(--color-card); padding: var(--spacing-lg); border-radius: var(--border-radius);
+                  margin-bottom: var(--spacing-lg); display: flex; justify-content: space-between; align-items: center;
+                  flex-wrap: wrap; gap: var(--spacing-md); }
+
+        /* Product image preview in table */
+        .product-thumb {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            object-fit: cover;
+            background: #f0fdf4;
+            border: 1px solid #e2e8f0;
+        }
+
+        .product-thumb-placeholder {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            background: #f0fdf4;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #10b981;
+            font-size: 16px;
+        }
+
+        /* Image Upload Preview */
+        .img-upload-area {
+            border: 2px dashed var(--color-border);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .img-upload-area:hover { border-color: var(--color-primary); background: rgba(99,102,241,0.04); }
+        .img-upload-area input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+        .img-preview { width: 100%; max-height: 160px; object-fit: cover; border-radius: 8px; margin-top: 10px; display: none; }
+
+        /* Mobile Menu */
+        .mobile-menu-btn { display: none; background: none; border: none; font-size: 20px;
+                           color: var(--color-text-primary); cursor: pointer; padding: 8px; }
+        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+                           background: rgba(0,0,0,0.5); z-index: 999; }
+        @media (max-width: 768px) {
+            .mobile-menu-btn { display: block; }
+            .admin-sidebar { transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); }
+            .admin-sidebar.open { transform: translateX(0) !important; }
+            .sidebar-overlay.show { display: block; }
+            .admin-main { margin-left: 0; padding: var(--spacing-md); width: 100%; }
+            .admin-header { padding: 12px 16px; }
+            .page-title { font-size: 18px; }
+            .toolbar { flex-direction: column; align-items: stretch; }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-layout">
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <aside class="admin-sidebar" id="adminSidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-brand"><i class="fas fa-gift"></i><span>Reward Point</span></div>
+            </div>
+            <nav class="sidebar-menu">
+                <a href="dashboard.html" class="menu-item"><i class="fas fa-home"></i><span>Dashboard</span></a>
+                <a href="members.html" class="menu-item"><i class="fas fa-users"></i><span>Kelola Anggota</span></a>
+                <a href="rewards.html" class="menu-item"><i class="fas fa-gift"></i><span>Kelola Hadiah</span></a>
+                <a href="categories.html" class="menu-item"><i class="fas fa-tags"></i><span>Kelola Kategori</span></a>
+                <a href="products.html" class="menu-item active"><i class="fas fa-shopping-bag"></i><span>Kelola Produk</span></a>
+                <a href="banners.html" class="menu-item"><i class="fas fa-image"></i><span>Kelola Banner</span></a>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="btn btn-danger" id="logoutBtn" style="width: 100%;">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </aside>
+
+        <main class="admin-main">
+            <header class="admin-header">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <button class="mobile-menu-btn" id="mobileMenuBtn"><i class="fas fa-bars"></i></button>
+                    <h1 class="page-title">Kelola Produk</h1>
+                </div>
+                <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
+            </header>
+
+            <div class="toolbar">
+                <div class="search-box" style="max-width: 400px; flex: 1;">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Cari produk...">
+                </div>
+                <button class="btn btn-primary" id="addProductBtn">
+                    <i class="fas fa-plus"></i> Tambah Produk
+                </button>
+            </div>
+
+            <div class="table-wrapper">
+                <table class="table" id="productsTable">
+                    <thead>
+                        <tr>
+                            <th>Gambar</th>
+                            <th>Nama Produk</th>
+                            <th>Bintang Didapat</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productsBody">
+                        <tr><td colspan="5" style="text-align: center;">
+                            <i class="fas fa-spinner fa-spin"></i> Memuat data...
+                        </td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Tambah/Edit Produk -->
+    <div class="modal" id="productModal">
+        <div class="modal-content" style="max-width: 550px;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Tambah Produk</h3>
+                <button class="modal-close" id="modalClose"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="productForm">
+                    <div class="form-group">
+                        <label class="form-label">Nama Produk <span style="color:red">*</span></label>
+                        <input type="text" class="form-control" id="productName" placeholder="Cth: Coil Ninja V1" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Bintang Didapat <span style="color:red">*</span></label>
+                        <input type="number" class="form-control" id="productPoint" placeholder="Cth: 10" min="1" required>
+                        <small style="color:var(--color-text-secondary);font-size:12px;margin-top:4px;display:block;">Jumlah bintang yang diperoleh member saat membeli produk ini</small>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Gambar Produk (Opsional)</label>
+                        <div class="img-upload-area" id="imgUploadArea">
+                            <input type="file" id="productImageFile" accept="image/*">
+                            <i class="fas fa-cloud-upload-alt" style="font-size:28px;color:var(--color-primary);"></i>
+                            <p style="font-size:13px;color:var(--color-text-primary);margin-top:8px;font-weight:600;">Klik untuk upload gambar</p>
+                            <img id="imgPreview" class="img-preview" alt="Preview">
+                        </div>
+                        <input type="hidden" id="productImageUrl">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Status</label>
+                        <select class="form-control form-select" id="productStatus">
+                            <option value="active">Aktif</option>
+                            <option value="inactive">Nonaktif</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelBtn">Batal</button>
+                <button class="btn btn-primary" id="saveBtn">
+                    <i class="fas fa-save"></i> Simpan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script type="module">
+        import productService from '../../js/services/product.service.js';
+        import authService from '../../js/services/auth.service.js';
+        import { showToast, showConfirm } from '../../js/utils/helpers.js';
+
+        // ---- Auth Check ----
+        await authService.protectAdminPage();
+
+        // ---- Elements ----
+        const productsBody = document.getElementById('productsBody');
+        const searchInput = document.getElementById('searchInput');
+        const productModal = document.getElementById('productModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const productForm = document.getElementById('productForm');
+        const imgPreview = document.getElementById('imgPreview');
+        const productImageFile = document.getElementById('productImageFile');
+
+        let currentEditId = null;
+        let searchTimer;
+
+        // ---- Load Products ----
+        async function loadProducts(search = '') {
+            productsBody.innerHTML = '<tr><td colspan="5" style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> Memuat...</td></tr>';
+            const result = await productService.getAll({ search });
+            if (!result.success) {
+                productsBody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:red;">Gagal memuat data</td></tr>`;
+                return;
+            }
+            if (!result.data || result.data.length === 0) {
+                productsBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Belum ada produk</td></tr>';
+                return;
+            }
+            productsBody.innerHTML = result.data.map(p => `
+                <tr>
+                    <td>
+                        ${p.image
+                            ? `<img src="${p.image}" alt="${p.name}" class="product-thumb" onerror="this.style.display='none'">`
+                            : `<div class="product-thumb-placeholder"><i class="fas fa-box"></i></div>`
+                        }
+                    </td>
+                    <td style="font-weight:600;">${p.name}</td>
+                    <td>
+                        <span style="color:#f59e0b;font-weight:700;">
+                            <i class="fas fa-star"></i> ${p.point_earned} bintang
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge ${p.status === 'active' ? 'badge-success' : 'badge-secondary'}">
+                            ${p.status === 'active' ? 'Aktif' : 'Nonaktif'}
+                        </span>
+                    </td>
+                    <td>
+                        <div style="display:flex;gap:6px;">
+                            <button class="btn btn-sm btn-primary" onclick="editProduct('${p.id}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteProduct('${p.id}','${p.name.replace(/'/g,"\\'")}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // ---- Search ----
+        searchInput.addEventListener('input', () => {
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(() => loadProducts(searchInput.value.trim()), 300);
+        });
+
+        // ---- Open Modal ----
+        function openModal(title = 'Tambah Produk') {
+            modalTitle.textContent = title;
+            productModal.classList.add('show');
+        }
+
+        function closeModal() {
+            productModal.classList.remove('show');
+            productForm.reset();
+            imgPreview.style.display = 'none';
+            imgPreview.src = '';
+            document.getElementById('productImageUrl').value = '';
+            currentEditId = null;
+        }
+
+        // ---- Image Preview ----
+        productImageFile.addEventListener('change', () => {
+            const file = productImageFile.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    imgPreview.src = e.target.result;
+                    imgPreview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // ---- Add Product ----
+        document.getElementById('addProductBtn').addEventListener('click', () => {
+            currentEditId = null;
+            openModal('Tambah Produk');
+        });
+
+        // ---- Edit Product ----
+        window.editProduct = async (id) => {
+            currentEditId = id;
+            const result = await productService.getById(id);
+            if (!result.success) { showToast('Gagal memuat data produk', 'error'); return; }
+            const p = result.data;
+            document.getElementById('productName').value = p.name;
+            document.getElementById('productPoint').value = p.point_earned;
+            document.getElementById('productStatus').value = p.status;
+            document.getElementById('productImageUrl').value = p.image || '';
+            if (p.image) {
+                imgPreview.src = p.image;
+                imgPreview.style.display = 'block';
+            }
+            openModal('Edit Produk');
+        };
+
+        // ---- Save ----
+        document.getElementById('saveBtn').addEventListener('click', async () => {
+            const name = document.getElementById('productName').value.trim();
+            const point_earned = parseInt(document.getElementById('productPoint').value);
+            const status = document.getElementById('productStatus').value;
+            let imageUrl = document.getElementById('productImageUrl').value;
+
+            if (!name) { showToast('Nama produk wajib diisi', 'warning'); return; }
+            if (!point_earned || point_earned < 1) { showToast('Bintang harus minimal 1', 'warning'); return; }
+
+            document.getElementById('saveBtn').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+            document.getElementById('saveBtn').disabled = true;
+
+            // Upload image jika ada file baru
+            const file = productImageFile.files[0];
+            if (file) {
+                const uploadResult = await productService.uploadImage(file, currentEditId || 'new');
+                if (!uploadResult.success) { showToast('Gagal upload gambar: ' + uploadResult.error, 'error'); }
+                else { imageUrl = uploadResult.url; }
+            }
+
+            const productData = { name, point_earned, status, image: imageUrl || null };
+            let result;
+            if (currentEditId) {
+                result = await productService.update(currentEditId, productData);
+            } else {
+                result = await productService.create(productData);
+            }
+
+            document.getElementById('saveBtn').innerHTML = '<i class="fas fa-save"></i> Simpan';
+            document.getElementById('saveBtn').disabled = false;
+
+            if (result.success) {
+                showToast(currentEditId ? 'Produk berhasil diupdate' : 'Produk berhasil ditambahkan', 'success');
+                closeModal();
+                loadProducts();
+            } else {
+                showToast('Error: ' + result.error, 'error');
+            }
+        });
+
+        // ---- Delete ----
+        window.deleteProduct = async (id, name) => {
+            const confirmed = await showConfirm(`Hapus produk "${name}"?`, 'Produk yang dihapus tidak bisa dikembalikan.');
+            if (!confirmed) return;
+            const result = await productService.delete(id);
+            if (result.success) {
+                showToast('Produk berhasil dihapus', 'success');
+                loadProducts();
+            } else {
+                showToast('Gagal menghapus: ' + result.error, 'error');
+            }
+        };
+
+        // ---- Close Modal ----
+        document.getElementById('modalClose').addEventListener('click', closeModal);
+        document.getElementById('cancelBtn').addEventListener('click', closeModal);
+        window.addEventListener('click', (e) => {
+            if (e.target === productModal) {
+                closeModal();
+            }
+        });
+
+        // ---- Logout ----
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            await authService.logout();
+            window.location.href = 'login.html';
+        });
+
+        // ---- Mobile Menu ----
+        const adminSidebar = document.getElementById('adminSidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+            adminSidebar.classList.toggle('open');
+            sidebarOverlay.classList.toggle('show');
+        });
+        sidebarOverlay.addEventListener('click', () => {
+            adminSidebar.classList.remove('open');
+            sidebarOverlay.classList.remove('show');
+        });
+
+        // ---- Theme Toggle ----
+        const themeToggle = document.getElementById('themeToggle');
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        themeToggle.innerHTML = savedTheme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+        themeToggle.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            themeToggle.innerHTML = next === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+        });
+
+        // ---- Init ----
+        loadProducts();
+    </script>
+</body>
+</html>

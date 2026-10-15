@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Banner - Admin</title>
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <link rel="stylesheet" href="../../assets/css/components.css">
+    <link rel="stylesheet" href="../../assets/css/responsive.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { background: var(--color-bg-alt); }
+        .admin-layout { display: flex; min-height: 100vh; }
+        .admin-sidebar { width: 260px; background: var(--color-card); box-shadow: var(--shadow-md);
+                        position: fixed; top: 0; left: 0; height: 100vh; overflow-y: auto; z-index: 1000; }
+        .sidebar-header { padding: var(--spacing-lg); border-bottom: 1px solid var(--color-bg-alt); }
+        .sidebar-brand { display: flex; align-items: center; gap: var(--spacing-sm);
+                        font-size: var(--font-size-xl); font-weight: 700; color: var(--color-primary); }
+        .sidebar-menu { padding: var(--spacing-lg) 0; }
+        .menu-item { display: flex; align-items: center; gap: var(--spacing-md);
+                    padding: var(--spacing-md) var(--spacing-lg); color: var(--color-text-secondary);
+                    font-weight: 500; transition: var(--transition-fast); border-left: 3px solid transparent; }
+        .menu-item:hover { background: var(--color-bg-alt); color: var(--color-primary); }
+        .menu-item.active { background: var(--color-bg-alt); color: var(--color-primary); border-left-color: var(--color-primary); }
+        .menu-item i { width: 20px; text-align: center; }
+        .sidebar-footer { padding: var(--spacing-lg); border-top: 1px solid var(--color-bg-alt); }
+        .admin-main { flex: 1; margin-left: 260px; padding: var(--spacing-xl); min-width: 0; }
+        .admin-header { background: var(--color-card); padding: var(--spacing-lg) var(--spacing-xl);
+                       border-radius: var(--border-radius-lg); margin-bottom: var(--spacing-xl);
+                       display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-sm); }
+        .page-title { font-size: var(--font-size-2xl); font-weight: 700; }
+        .toolbar { background: var(--color-card); padding: var(--spacing-lg); border-radius: var(--border-radius);
+                  margin-bottom: var(--spacing-lg); display: flex; justify-content: space-between; align-items: center;
+                  flex-wrap: wrap; gap: var(--spacing-md); }
+
+        /* Banner Grid Cards */
+        .banner-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            margin-top: 0;
+        }
+
+        .banner-card {
+            background: var(--color-card);
+            border-radius: 12px;
+            border: 1px solid var(--color-border);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+
+        .banner-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .banner-card-img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            display: block;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+        }
+
+        .banner-card-img-placeholder {
+            width: 100%;
+            height: 160px;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255,255,255,0.3);
+            font-size: 48px;
+        }
+
+        .banner-card-body {
+            padding: 14px 16px;
+        }
+
+        .banner-card-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--color-text-primary);
+            margin-bottom: 10px;
+        }
+
+        .banner-card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* Image Upload */
+        .img-upload-area {
+            border: 2px dashed var(--color-border);
+            border-radius: var(--border-radius);
+            padding: 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .img-upload-area:hover { border-color: var(--color-primary); background: rgba(99,102,241,0.04); }
+        .img-upload-area input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+        .img-preview { width: 100%; max-height: 200px; object-fit: contain; border-radius: 8px; margin-top: 12px; display: none; }
+
+        /* Mobile Menu */
+        .mobile-menu-btn { display: none; background: none; border: none; font-size: 20px;
+                           color: var(--color-text-primary); cursor: pointer; padding: 8px; }
+        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+                           background: rgba(0,0,0,0.5); z-index: 999; }
+        @media (max-width: 768px) {
+            .mobile-menu-btn { display: block; }
+            .admin-sidebar { transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); }
+            .admin-sidebar.open { transform: translateX(0) !important; }
+            .sidebar-overlay.show { display: block; }
+            .admin-main { margin-left: 0; padding: var(--spacing-md); }
+            .banner-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-layout">
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <aside class="admin-sidebar" id="adminSidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-brand"><i class="fas fa-gift"></i><span>Reward Point</span></div>
+            </div>
+            <nav class="sidebar-menu">
+                <a href="dashboard.html" class="menu-item"><i class="fas fa-home"></i><span>Dashboard</span></a>
+                <a href="members.html" class="menu-item"><i class="fas fa-users"></i><span>Kelola Anggota</span></a>
+                <a href="rewards.html" class="menu-item"><i class="fas fa-gift"></i><span>Kelola Hadiah</span></a>
+                <a href="categories.html" class="menu-item"><i class="fas fa-tags"></i><span>Kelola Kategori</span></a>
+                <a href="products.html" class="menu-item"><i class="fas fa-shopping-bag"></i><span>Kelola Produk</span></a>
+                <a href="banners.html" class="menu-item active"><i class="fas fa-image"></i><span>Kelola Banner</span></a>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="btn btn-danger" id="logoutBtn" style="width: 100%;">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </aside>
+
+        <main class="admin-main">
+            <header class="admin-header">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <button class="mobile-menu-btn" id="mobileMenuBtn"><i class="fas fa-bars"></i></button>
+                    <h1 class="page-title">Kelola Banner</h1>
+                </div>
+                <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
+            </header>
+
+            <!-- Info -->
+            <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 14px 18px; margin-bottom: 20px; display:flex; gap:10px; align-items:flex-start;">
+                <i class="fas fa-info-circle" style="color: #3b82f6; margin-top: 2px;"></i>
+                <div style="font-size:13px; color:#1e40af;">
+                    <strong>Tips Banner:</strong> Upload gambar iklan, promo, atau logo toko. Banner akan tampil sebagai <em>slideshow otomatis</em> di bagian atas halaman utama website. Ukuran ideal: <strong>1200 × 400 piksel</strong> (rasio 3:1).
+                </div>
+            </div>
+
+            <div class="toolbar">
+                <div style="font-size:14px;color:var(--color-text-secondary);">
+                    <i class="fas fa-images" style="margin-right:6px;"></i>
+                    <span id="bannerCount">Memuat...</span> banner
+                </div>
+                <button class="btn btn-primary" id="addBannerBtn">
+                    <i class="fas fa-plus"></i> Tambah Banner
+                </button>
+            </div>
+
+            <!-- Banner Cards Grid -->
+            <div class="banner-grid" id="bannersGrid">
+                <div style="text-align:center;padding:40px;grid-column:1/-1;color:var(--color-text-secondary);">
+                    <i class="fas fa-spinner fa-spin" style="font-size:24px;"></i>
+                    <p style="margin-top:12px;">Memuat banner...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Tambah/Edit Banner -->
+    <div class="modal" id="bannerModal">
+        <div class="modal-content" style="max-width: 550px;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Tambah Banner</h3>
+                <button class="modal-close" id="modalClose"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="bannerForm">
+                    <div class="form-group">
+                        <label class="form-label">Judul Banner (Opsional)</label>
+                        <input type="text" class="form-control" id="bannerTitle" placeholder="Cth: Promo Akhir Tahun">
+                        <small style="color:var(--color-text-secondary);font-size:12px;margin-top:4px;display:block;">Judul akan muncul sebagai teks di atas banner gambar</small>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Gambar Banner <span style="color:red">*</span></label>
+                        <div class="img-upload-area" id="imgUploadArea">
+                            <input type="file" id="bannerImageFile" accept="image/*">
+                            <i class="fas fa-cloud-upload-alt" style="font-size:32px;color:var(--color-primary);"></i>
+                            <p style="font-size:13px;color:var(--color-text-primary);margin-top:8px;font-weight:600;">Klik untuk upload gambar</p>
+                            <p style="font-size:12px;color:var(--color-text-secondary);">Format: JPG, PNG, WEBP | Max: 5MB</p>
+                            <img id="imgPreview" class="img-preview" alt="Preview">
+                        </div>
+                        <input type="hidden" id="bannerImageUrl">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Status</label>
+                        <select class="form-control form-select" id="bannerStatus">
+                            <option value="active">Aktif (tampil di website)</option>
+                            <option value="inactive">Nonaktif (disembunyikan)</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelBtn">Batal</button>
+                <button class="btn btn-primary" id="saveBtn">
+                    <i class="fas fa-save"></i> Simpan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script type="module">
+        import bannerService from '../../js/services/banner.service.js';
+        import authService from '../../js/services/auth.service.js';
+        import { showToast, showConfirm } from '../../js/utils/helpers.js';
+
+        // ---- Auth Check ----
+        await authService.protectAdminPage();
+
+        // ---- Elements ----
+        const bannersGrid = document.getElementById('bannersGrid');
+        const bannerModal = document.getElementById('bannerModal');
+        const imgPreview = document.getElementById('imgPreview');
+        const bannerImageFile = document.getElementById('bannerImageFile');
+
+        let currentEditId = null;
+
+        // ---- Load Banners ----
+        async function loadBanners() {
+            bannersGrid.innerHTML = '<div style="text-align:center;padding:40px;grid-column:1/-1;color:var(--color-text-secondary);"><i class="fas fa-spinner fa-spin" style="font-size:24px;"></i><p style="margin-top:12px;">Memuat...</p></div>';
+            const result = await bannerService.getAll();
+            document.getElementById('bannerCount').textContent = result.data ? result.data.length : 0;
+
+            if (!result.success || !result.data || result.data.length === 0) {
+                bannersGrid.innerHTML = `
+                    <div style="text-align:center;padding:60px 20px;grid-column:1/-1;color:var(--color-text-secondary);">
+                        <i class="fas fa-images" style="font-size:48px;opacity:0.3;"></i>
+                        <p style="margin-top:16px;font-size:14px;">Belum ada banner. Klik "Tambah Banner" untuk mulai.</p>
+                    </div>`;
+                return;
+            }
+
+            bannersGrid.innerHTML = result.data.map(b => `
+                <div class="banner-card">
+                    ${b.image
+                        ? `<img src="${b.image}" class="banner-card-img" alt="${b.title || 'Banner'}" onerror="this.style.display='none'">`
+                        : `<div class="banner-card-img-placeholder"><i class="fas fa-image"></i></div>`
+                    }
+                    <div class="banner-card-body">
+                        <div class="banner-card-title">${b.title || '<span style="color:#94a3b8;font-style:italic;">Tanpa judul</span>'}</div>
+                        <div class="banner-card-footer">
+                            <span class="badge ${b.status === 'active' ? 'badge-success' : 'badge-secondary'}">
+                                ${b.status === 'active' ? '● Aktif' : '○ Nonaktif'}
+                            </span>
+                            <div style="display:flex;gap:6px;">
+                                <button class="btn btn-sm btn-primary" onclick="editBanner('${b.id}')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteBanner('${b.id}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ---- Modal Open/Close ----
+        function openModal(title = 'Tambah Banner') {
+            document.getElementById('modalTitle').textContent = title;
+            bannerModal.classList.add('show');
+        }
+
+        function closeModal() {
+            bannerModal.classList.remove('show');
+            document.getElementById('bannerForm').reset();
+            imgPreview.style.display = 'none';
+            imgPreview.src = '';
+            document.getElementById('bannerImageUrl').value = '';
+            currentEditId = null;
+        }
+
+        // ---- Image Preview ----
+        bannerImageFile.addEventListener('change', () => {
+            const file = bannerImageFile.files[0];
+            if (!file) return;
+            if (file.size > 5 * 1024 * 1024) { showToast('Ukuran file maksimal 5MB', 'warning'); return; }
+            const reader = new FileReader();
+            reader.onload = e => {
+                imgPreview.src = e.target.result;
+                imgPreview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // ---- Add Banner ----
+        document.getElementById('addBannerBtn').addEventListener('click', () => {
+            currentEditId = null;
+            openModal('Tambah Banner');
+        });
+
+        // ---- Edit Banner ----
+        window.editBanner = async (id) => {
+            currentEditId = id;
+            const result = await bannerService.getAll();
+            const b = result.data.find(x => x.id === id);
+            if (!b) { showToast('Data tidak ditemukan', 'error'); return; }
+            document.getElementById('bannerTitle').value = b.title || '';
+            document.getElementById('bannerStatus').value = b.status;
+            document.getElementById('bannerImageUrl').value = b.image || '';
+            if (b.image) { imgPreview.src = b.image; imgPreview.style.display = 'block'; }
+            openModal('Edit Banner');
+        };
+
+        // ---- Save ----
+        document.getElementById('saveBtn').addEventListener('click', async () => {
+            const title = document.getElementById('bannerTitle').value.trim();
+            const status = document.getElementById('bannerStatus').value;
+            let imageUrl = document.getElementById('bannerImageUrl').value;
+
+            const file = bannerImageFile.files[0];
+            if (!file && !imageUrl) { showToast('Gambar banner wajib diupload', 'warning'); return; }
+
+            const saveBtn = document.getElementById('saveBtn');
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+            saveBtn.disabled = true;
+
+            // Upload file baru jika ada
+            if (file) {
+                const uploadResult = await bannerService.uploadImage(file);
+                if (!uploadResult.success) {
+                    showToast('Gagal upload gambar: ' + uploadResult.error, 'error');
+                    saveBtn.innerHTML = '<i class="fas fa-save"></i> Simpan';
+                    saveBtn.disabled = false;
+                    return;
+                }
+                imageUrl = uploadResult.url;
+            }
+
+            const bannerData = { title: title || null, image: imageUrl, status };
+            let result;
+            if (currentEditId) {
+                result = await bannerService.update(currentEditId, bannerData);
+            } else {
+                result = await bannerService.create(bannerData);
+            }
+
+            saveBtn.innerHTML = '<i class="fas fa-save"></i> Simpan';
+            saveBtn.disabled = false;
+
+            if (result.success) {
+                showToast(currentEditId ? 'Banner berhasil diupdate' : 'Banner berhasil ditambahkan', 'success');
+                closeModal();
+                loadBanners();
+            } else {
+                showToast('Error: ' + result.error, 'error');
+            }
+        });
+
+        // ---- Delete ----
+        window.deleteBanner = async (id) => {
+            const confirmed = await showConfirm('Hapus banner ini?', 'Banner yang dihapus tidak bisa dikembalikan.');
+            if (!confirmed) return;
+            const result = await bannerService.delete(id);
+            if (result.success) {
+                showToast('Banner berhasil dihapus', 'success');
+                loadBanners();
+            } else {
+                showToast('Gagal menghapus: ' + result.error, 'error');
+            }
+        };
+
+        // ---- Close Modal Events ----
+        document.getElementById('modalClose').addEventListener('click', closeModal);
+        document.getElementById('cancelBtn').addEventListener('click', closeModal);
+        window.addEventListener('click', (e) => {
+            if (e.target === bannerModal) {
+                closeModal();
+            }
+        });
+
+        // ---- Logout ----
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            await authService.logout();
+            window.location.href = 'login.html';
+        });
+
+        // ---- Mobile Menu ----
+        const adminSidebar = document.getElementById('adminSidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+            adminSidebar.classList.toggle('open');
+            sidebarOverlay.classList.toggle('show');
+        });
+        sidebarOverlay.addEventListener('click', () => {
+            adminSidebar.classList.remove('open');
+            sidebarOverlay.classList.remove('show');
+        });
+
+        // ---- Theme Toggle ----
+        const themeToggle = document.getElementById('themeToggle');
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        themeToggle.innerHTML = savedTheme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+        themeToggle.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            themeToggle.innerHTML = next === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+        });
+
+        // ---- Init ----
+        loadBanners();
+    </script>
+</body>
+</html>
