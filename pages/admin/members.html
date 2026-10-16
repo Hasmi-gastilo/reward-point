@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kelola Anggota - Admin</title>
+    <link rel="icon" type="image/png" href="../../assets/images/favicon.png">
     <link rel="stylesheet" href="../../assets/css/main.css">
     <link rel="stylesheet" href="../../assets/css/components.css">
     <link rel="stylesheet" href="../../assets/css/responsive.css">
@@ -34,57 +35,251 @@
                   margin-bottom: var(--spacing-lg); display: flex; justify-content: space-between; align-items: center; 
                   flex-wrap: wrap; gap: var(--spacing-md); }
 
-        /* Point adjustment buttons */
-        .point-controls {
-            display: flex;
+        /* Point badge and action */
+        .point-badge-large {
+            display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
+            font-weight: 700;
+            font-size: 13px;
+            color: #d97706;
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 1px solid #fcd34d;
         }
 
-        .point-btn {
-            width: 28px;
-            height: 28px;
-            border-radius: 6px;
-            border: 1px solid #e2e8f0;
-            background: #fff;
+        /* Member summary in modal */
+        .member-modal-summary {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 16px;
+            background: var(--color-bg-alt);
+            border-radius: var(--border-radius);
+            margin-bottom: 16px;
+            border: 1px solid var(--color-border);
+        }
+        .member-modal-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--color-card);
+        }
+        .member-modal-details { flex: 1; min-width: 0; }
+        .member-modal-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--color-text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .member-modal-meta { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
+        .member-modal-points { text-align: right; }
+        .member-modal-pts-val {
+            font-size: 18px;
+            font-weight: 800;
+            color: #d97706;
+            margin-top: 2px;
+        }
+
+        /* Mode Tabs */
+        .point-mode-tabs {
+            display: flex;
+            gap: 8px;
+            background: var(--color-bg-alt);
+            padding: 4px;
+            border-radius: var(--border-radius);
+            margin-bottom: 14px;
+        }
+        .point-mode-tab {
+            flex: 1;
+            padding: 8px 12px;
+            border-radius: calc(var(--border-radius) - 2px);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .point-mode-tab.active {
+            background: var(--color-card);
+            color: var(--color-primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Product Picker Grid */
+        .product-picker-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 8px;
+            max-height: 220px;
+            overflow-y: auto;
+            padding: 2px;
+        }
+        .product-pick-card {
+            border: 1.5px solid var(--color-border);
+            border-radius: var(--border-radius);
+            padding: 10px 12px;
+            cursor: pointer;
+            background: var(--color-card);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+        }
+        .product-pick-card:hover {
+            border-color: #10b981;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(16,185,129,0.12);
+        }
+        .product-pick-card.selected {
+            border-color: #10b981;
+            background: linear-gradient(135deg, rgba(16,185,129,0.08), rgba(5,150,105,0.04));
+            box-shadow: 0 0 0 2px rgba(16,185,129,0.25);
+        }
+        .product-pick-thumb {
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            object-fit: cover;
+            background: #f0fdf4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #10b981;
+            font-size: 14px;
+            flex-shrink: 0;
+            border: 1px solid #d1fae5;
+        }
+        .product-pick-info { flex: 1; min-width: 0; }
+        .product-pick-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--color-text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .product-pick-pts {
+            font-size: 11px;
+            font-weight: 700;
+            color: #059669;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            margin-top: 2px;
+        }
+        .product-pick-check {
+            color: #10b981;
+            font-size: 16px;
+            display: none;
+        }
+        .product-pick-card.selected .product-pick-check { display: block; }
+
+        /* Qty Stepper */
+        .qty-stepper {
+            display: inline-flex;
+            align-items: center;
+            border: 1px solid var(--color-border);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            background: var(--color-card);
+        }
+        .qty-btn {
+            width: 34px;
+            height: 34px;
+            border: none;
+            background: var(--color-bg-alt);
+            color: var(--color-text-primary);
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 12px;
-            color: #475569;
+            font-size: 13px;
+            transition: background 0.15s;
+        }
+        .qty-btn:hover { background: var(--color-border); }
+        .qty-input {
+            width: 48px;
+            height: 34px;
+            border: none;
+            text-align: center;
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--color-text-primary);
+            background: transparent;
+            outline: none;
+        }
+
+        /* Type Radio */
+        .type-radio-label {
+            flex: 1;
+            cursor: pointer;
+            display: block;
+        }
+        .type-radio-label input { display: none; }
+        .type-badge-opt {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 10px;
+            border-radius: var(--border-radius);
+            font-size: 13px;
+            font-weight: 600;
+            border: 1.5px solid var(--color-border);
+            background: var(--color-card);
             transition: all 0.15s;
         }
-
-        .point-btn:hover {
-            background: var(--color-primary);
-            color: white;
-            border-color: var(--color-primary);
+        .type-radio-label input:checked + .type-badge-opt.plus {
+            border-color: #10b981;
+            background: #f0fdf4;
+            color: #065f46;
+        }
+        .type-radio-label input:checked + .type-badge-opt.minus {
+            border-color: #ef4444;
+            background: #fef2f2;
+            color: #991b1b;
         }
 
-        .point-btn.minus:hover {
-            background: var(--color-danger);
-            border-color: var(--color-danger);
+        /* Live Calc Box */
+        .calc-preview-box {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            border: 1.5px solid #86efac;
+            border-radius: var(--border-radius);
+            padding: 12px 16px;
+            margin-top: 14px;
+        }
+        .calc-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            color: #1e293b;
+            padding: 3px 0;
+        }
+        .calc-row.total {
+            border-top: 1.5px dashed #86efac;
+            margin-top: 6px;
+            padding-top: 8px;
+            font-size: 15px;
+            font-weight: 800;
+            color: #065f46;
         }
 
-        .point-btn:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-            background: #f1f5f9;
-        }
-
-        .point-value {
-            min-width: 60px;
-            text-align: center;
-            font-weight: 600;
-            color: var(--color-secondary);
-            font-size: 0.95rem;
-        }
-
-        .point-value i { margin-right: 3px; }
-
-        .point-value.updating {
-            opacity: 0.5;
+        @media (max-width: 600px) {
+            .product-picker-grid { grid-template-columns: 1fr; }
         }
 
         /* Mobile Menu */
@@ -117,6 +312,65 @@
             opacity: 1;
         }
 
+        /* ===== RESPONSIVE TABLE & ACTIONS (NO-STACK) ===== */
+        .table-wrapper {
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch;
+            width: 100%;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            background: var(--color-card);
+            position: relative;
+        }
+
+        .table {
+            width: 100%;
+            min-width: 820px !important;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            white-space: nowrap !important;
+            vertical-align: middle;
+        }
+
+        .member-point-actions {
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 6px !important;
+            white-space: nowrap !important;
+            flex-wrap: nowrap !important;
+        }
+
+        .member-table-actions {
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 6px !important;
+            white-space: nowrap !important;
+            flex-wrap: nowrap !important;
+        }
+
+        .mobile-scroll-hint {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            background: rgba(79, 70, 229, 0.08);
+            border: 1px dashed rgba(79, 70, 229, 0.3);
+            border-radius: 8px;
+            color: var(--color-primary);
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+
+        [data-theme="dark"] .mobile-scroll-hint {
+            background: rgba(99, 102, 241, 0.15);
+            border-color: rgba(99, 102, 241, 0.4);
+            color: #a5b4fc;
+        }
+
         @media (max-width: 768px) {
             .mobile-menu-btn { display: block; }
             .admin-sidebar { 
@@ -127,11 +381,17 @@
                 transform: translateX(0) !important;
             }
             .sidebar-overlay.show { display: block; opacity: 1; }
-            .admin-main { margin-left: 0; padding: var(--spacing-md); width: 100%; overflow-x: hidden; }
-            .admin-header { padding: 12px 16px; border-radius: 8px; }
+            .admin-main { margin-left: 0; padding: var(--spacing-sm); width: 100%; overflow-x: hidden; }
+            .admin-header { padding: 12px 14px; border-radius: 8px; }
             .page-title { font-size: 18px; }
-            .toolbar { flex-direction: column; align-items: stretch; }
+            .toolbar { flex-direction: column; align-items: stretch; gap: 10px; }
             .search-box { max-width: 100% !important; }
+            .mobile-scroll-hint { display: flex; }
+            .table th,
+            .table td {
+                padding: 10px 12px;
+                font-size: 13px;
+            }
         }
     </style>
 </head>
@@ -142,7 +402,13 @@
 
         <aside class="admin-sidebar" id="adminSidebar">
             <div class="sidebar-header">
-                <div class="sidebar-brand"><i class="fas fa-gift"></i><span>Reward Point</span></div>
+                <div class="sidebar-brand">
+                    <div class="brand-logo-container">
+                        <img src="../../assets/images/logo-light.png" alt="Logo" class="brand-logo logo-light">
+                        <img src="../../assets/images/logo-dark.png" alt="Logo" class="brand-logo logo-dark">
+                    </div>
+                    <span>Reward Point</span>
+                </div>
             </div>
             <nav class="sidebar-menu">
                 <a href="dashboard.html" class="menu-item"><i class="fas fa-home"></i><span>Dashboard</span></a>
@@ -178,6 +444,10 @@
                 <button class="btn btn-primary" id="addMemberBtn">
                     <i class="fas fa-plus"></i> Tambah Anggota
                 </button>
+            </div>
+
+            <div class="mobile-scroll-hint">
+                <i class="fas fa-arrows-alt-h"></i> Geser tabel ke kanan untuk melihat status & tombol aksi lengkap
             </div>
 
             <div class="table-wrapper">
@@ -244,15 +514,171 @@
         </div>
     </div>
 
+    <!-- Modal Tambah Bintang -->
+    <div class="modal" id="addPointModal">
+        <div class="modal-content" style="max-width: 580px;">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fas fa-star" style="color: #f59e0b; margin-right: 8px;"></i>Tambah Bintang Member</h3>
+                <button class="modal-close" id="closeAddPointModal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <!-- Ringkasan Member -->
+                <div class="member-modal-summary">
+                    <img src="" alt="" class="member-modal-avatar" id="addPointMemberAvatar">
+                    <div class="member-modal-details">
+                        <div class="member-modal-name" id="addPointMemberName">-</div>
+                        <div class="member-modal-meta" id="addPointMemberNumber">-</div>
+                    </div>
+                    <div class="member-modal-points">
+                        <div style="font-size: 11px; color: var(--color-text-secondary); text-transform: uppercase; font-weight: 600;">Bintang Saat Ini</div>
+                        <div class="member-modal-pts-val" id="addPointCurrentPoints"><i class="fas fa-star"></i> 0</div>
+                    </div>
+                </div>
+
+                <!-- Tabs Mode: Berdasarkan Produk vs Manual -->
+                <div class="point-mode-tabs">
+                    <button type="button" class="point-mode-tab active" id="tabModeProduct">
+                        <i class="fas fa-shopping-bag"></i> Berdasarkan Produk
+                    </button>
+                    <button type="button" class="point-mode-tab" id="tabModeManual">
+                        <i class="fas fa-edit"></i> Input Manual
+                    </button>
+                </div>
+
+                <!-- Panel 1: Mode Produk -->
+                <div id="panelProductMode">
+                    <label class="form-label" style="margin-top: 10px; font-weight: 600;">Pilih Produk yang Dibeli:</label>
+                    <div class="product-picker-grid" id="productPickerGrid">
+                        <div style="grid-column: 1/-1; text-align: center; padding: 20px; color: var(--color-text-muted);">
+                            <i class="fas fa-spinner fa-spin"></i> Memuat produk...
+                        </div>
+                    </div>
+
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 14px; padding: 12px; background: var(--color-bg-alt); border-radius: var(--border-radius); border: 1px solid var(--color-border);">
+                        <div>
+                            <div style="font-weight: 600; font-size: 13px;">Jumlah Pembelian (Qty)</div>
+                            <div style="font-size: 11px; color: var(--color-text-secondary);">Bintang otomatis dikalikan jumlah beli</div>
+                        </div>
+                        <div class="qty-stepper">
+                            <button type="button" class="qty-btn" id="btnQtyMinus"><i class="fas fa-minus"></i></button>
+                            <input type="number" class="qty-input" id="qtyInput" value="1" min="1" max="999">
+                            <button type="button" class="qty-btn" id="btnQtyPlus"><i class="fas fa-plus"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel 2: Mode Manual -->
+                <div id="panelManualMode" style="display: none; margin-top: 12px;">
+                    <div class="form-group">
+                        <label class="form-label" style="font-weight: 600;">Tipe Transaksi *</label>
+                        <div style="display: flex; gap: 10px;">
+                            <label class="type-radio-label">
+                                <input type="radio" name="manualType" value="plus" checked>
+                                <span class="type-badge-opt plus"><i class="fas fa-plus-circle"></i> Tambah Bintang (+)</span>
+                            </label>
+                            <label class="type-radio-label">
+                                <input type="radio" name="manualType" value="minus">
+                                <span class="type-badge-opt minus"><i class="fas fa-minus-circle"></i> Kurangi Bintang (-)</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" style="font-weight: 600;">Jumlah Bintang *</label>
+                        <input type="number" class="form-control" id="manualPointInput" placeholder="Masukkan angka bintang (misal: 75)" min="1">
+                    </div>
+                </div>
+
+                <!-- Keterangan Transaksi -->
+                <div class="form-group" style="margin-top: 14px;">
+                    <label class="form-label" style="font-weight: 600;">Keterangan / Catatan Transaksi</label>
+                    <input type="text" class="form-control" id="pointDescription" placeholder="Otomatis dari produk atau ketik manual...">
+                </div>
+
+                <!-- Live Preview Perhitungan -->
+                <div class="calc-preview-box">
+                    <div class="calc-row">
+                        <span>Bintang Saat Ini:</span>
+                        <strong id="calcInitialPoints">0 ★</strong>
+                    </div>
+                    <div class="calc-row">
+                        <span id="calcDeltaLabel">Bintang Ditambah:</span>
+                        <strong id="calcDeltaPoints" style="color: #059669;">+0 ★</strong>
+                    </div>
+                    <div class="calc-row total">
+                        <span>Total Akhir Baru:</span>
+                        <strong id="calcNewTotal" style="color: #059669; font-size: 16px;">0 ★</strong>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" id="cancelAddPointBtn">Batal</button>
+                <button type="button" class="btn btn-success" id="saveAddPointBtn">
+                    <i class="fas fa-check-circle"></i> Simpan &amp; Tambah Bintang
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Riwayat Bintang -->
+    <div class="modal" id="historyModal">
+        <div class="modal-content" style="max-width: 650px;">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fas fa-history" style="color: var(--color-primary); margin-right: 8px;"></i>Riwayat Bintang Member</h3>
+                <button class="modal-close" id="closeHistoryModal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="member-modal-summary" style="margin-bottom: 14px;">
+                    <img src="" alt="" class="member-modal-avatar" id="historyMemberAvatar">
+                    <div class="member-modal-details">
+                        <div class="member-modal-name" id="historyMemberName">-</div>
+                        <div class="member-modal-meta" id="historyMemberNumber">-</div>
+                    </div>
+                    <div class="member-modal-points">
+                        <div style="font-size: 11px; color: var(--color-text-secondary); text-transform: uppercase; font-weight: 600;">Total Saat Ini</div>
+                        <div class="member-modal-pts-val" id="historyCurrentPoints"><i class="fas fa-star"></i> 0</div>
+                    </div>
+                </div>
+                <div class="table-wrapper" style="max-height: 320px; overflow-y: auto;">
+                    <table class="table" style="font-size: 13px;">
+                        <thead>
+                            <tr>
+                                <th>Waktu</th>
+                                <th>Keterangan</th>
+                                <th style="text-align: right;">Jumlah</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            <tr><td colspan="3" style="text-align: center;"><i class="fas fa-spinner fa-spin"></i> Memuat...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="closeHistoryBtn">Tutup</button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script type="module">
         import authService from '../../js/services/auth.service.js';
         import memberService from '../../js/services/member.service.js';
+        import productService from '../../js/services/product.service.js';
         import { formatNumber, showToast, showConfirm, validateFile, getImagePreview, debounce } from '../../js/utils/helpers.js';
 
         await authService.protectAdminPage();
 
         let state = { currentPage: 1, perPage: 10, searchQuery: '', total: 0, editingId: null, uploadedPhotoUrl: null };
+        let cachedProducts = [];
+
+        let addPointState = {
+            member: null,
+            mode: 'product',
+            selectedProduct: null,
+            qty: 1,
+            manualType: 'plus',
+            manualPoint: 0
+        };
 
         const elements = {
             themeToggle: document.getElementById('themeToggle'),
@@ -273,6 +699,27 @@
             photoPreview: document.getElementById('photoPreview'),
             status: document.getElementById('status'),
             
+            // Add Point Modal Elements
+            addPointModal: document.getElementById('addPointModal'),
+            closeAddPointModal: document.getElementById('closeAddPointModal'),
+            cancelAddPointBtn: document.getElementById('cancelAddPointBtn'),
+            saveAddPointBtn: document.getElementById('saveAddPointBtn'),
+            tabModeProduct: document.getElementById('tabModeProduct'),
+            tabModeManual: document.getElementById('tabModeManual'),
+            panelProductMode: document.getElementById('panelProductMode'),
+            panelManualMode: document.getElementById('panelManualMode'),
+            productPickerGrid: document.getElementById('productPickerGrid'),
+            qtyInput: document.getElementById('qtyInput'),
+            btnQtyMinus: document.getElementById('btnQtyMinus'),
+            btnQtyPlus: document.getElementById('btnQtyPlus'),
+            manualPointInput: document.getElementById('manualPointInput'),
+            pointDescription: document.getElementById('pointDescription'),
+            
+            // History Modal Elements
+            historyModal: document.getElementById('historyModal'),
+            closeHistoryModal: document.getElementById('closeHistoryModal'),
+            closeHistoryBtn: document.getElementById('closeHistoryBtn'),
+
             // Mobile Menu
             mobileMenuBtn: document.getElementById('mobileMenuBtn'),
             adminSidebar: document.getElementById('adminSidebar'),
@@ -295,6 +742,7 @@
         }
 
         initTheme();
+        loadProductsCache();
         loadMembers();
 
         elements.searchInput.addEventListener('input', debounce(() => {
@@ -330,6 +778,57 @@
             elements.photoPreview.style.display = 'block';
         });
 
+        // Add Point Modal Event Listeners
+        elements.closeAddPointModal.addEventListener('click', () => elements.addPointModal.classList.remove('show'));
+        elements.cancelAddPointBtn.addEventListener('click', () => elements.addPointModal.classList.remove('show'));
+        elements.saveAddPointBtn.addEventListener('click', saveAddPoint);
+
+        elements.tabModeProduct.addEventListener('click', () => setAddPointMode('product'));
+        elements.tabModeManual.addEventListener('click', () => setAddPointMode('manual'));
+
+        elements.btnQtyMinus.addEventListener('click', () => {
+            let q = parseInt(elements.qtyInput.value) || 1;
+            if (q > 1) {
+                q--;
+                elements.qtyInput.value = q;
+                addPointState.qty = q;
+                if (addPointState.selectedProduct) {
+                    elements.pointDescription.value = `Pembelian ${addPointState.selectedProduct.name}${q > 1 ? ` (${q}x)` : ''}`;
+                }
+                updateLiveCalc();
+            }
+        });
+
+        elements.btnQtyPlus.addEventListener('click', () => {
+            let q = parseInt(elements.qtyInput.value) || 1;
+            q++;
+            elements.qtyInput.value = q;
+            addPointState.qty = q;
+            if (addPointState.selectedProduct) {
+                elements.pointDescription.value = `Pembelian ${addPointState.selectedProduct.name}${q > 1 ? ` (${q}x)` : ''}`;
+            }
+            updateLiveCalc();
+        });
+
+        elements.qtyInput.addEventListener('input', (e) => {
+            let q = parseInt(e.target.value) || 1;
+            if (q < 1) q = 1;
+            addPointState.qty = q;
+            if (addPointState.selectedProduct) {
+                elements.pointDescription.value = `Pembelian ${addPointState.selectedProduct.name}${q > 1 ? ` (${q}x)` : ''}`;
+            }
+            updateLiveCalc();
+        });
+
+        elements.manualPointInput.addEventListener('input', () => updateLiveCalc());
+        document.querySelectorAll('input[name="manualType"]').forEach(r => {
+            r.addEventListener('change', () => updateLiveCalc());
+        });
+
+        // History Modal Event Listeners
+        elements.closeHistoryModal.addEventListener('click', () => elements.historyModal.classList.remove('show'));
+        elements.closeHistoryBtn.addEventListener('click', () => elements.historyModal.classList.remove('show'));
+
         function initTheme() {
             const theme = localStorage.getItem('theme') || 'light';
             document.documentElement.setAttribute('data-theme', theme);
@@ -341,6 +840,17 @@
                 localStorage.setItem('theme', newTheme);
                 elements.themeToggle.querySelector('i').className = newTheme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
             });
+        }
+
+        async function loadProductsCache() {
+            try {
+                const res = await productService.getActive();
+                if (res.success && res.data) {
+                    cachedProducts = res.data;
+                }
+            } catch (e) {
+                console.error('Error loading products cache:', e);
+            }
         }
 
         async function loadMembers() {
@@ -371,28 +881,32 @@
                 <tr>
                     <td><img src="${m.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(m.fullname)}&background=e2e8f0&color=475569`}" alt="${m.fullname}" 
                              onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(m.fullname)}&background=e2e8f0&color=475569'"
-                             style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; display: block;"></td>
-                    <td>${m.member_number}</td>
+                             style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; display: block;"></td>
+                    <td><strong>${m.member_number}</strong></td>
                     <td>${m.fullname}</td>
                     <td>
-                        <div class="point-controls">
-                            <button class="point-btn minus" onclick="adjustPoint('${m.id}', -1)" title="Kurangi 1 bintang">
-                                <i class="fas fa-minus"></i>
-                            </button>
-                            <span class="point-value" id="points-${m.id}">
+                        <div class="member-point-actions">
+                            <span class="point-badge-large" id="points-${m.id}">
                                 <i class="fas fa-star"></i> ${formatNumber(m.total_point)}
                             </span>
-                            <button class="point-btn plus" onclick="adjustPoint('${m.id}', 1)" title="Tambah 1 bintang">
-                                <i class="fas fa-plus"></i>
+                            <button class="btn btn-sm btn-success" onclick="openAddPointModal('${m.id}')" title="Tambah Bintang Member" style="padding: 4px 10px; font-size: 12px; border-radius: 6px; white-space: nowrap;">
+                                <i class="fas fa-plus-circle"></i> Tambah
+                            </button>
+                            <button class="btn-icon btn-secondary" onclick="openHistoryModal('${m.id}')" title="Lihat Riwayat Bintang" style="width: 28px; height: 28px; font-size: 12px; border-radius: 6px; flex-shrink: 0;">
+                                <i class="fas fa-history"></i>
                             </button>
                         </div>
                     </td>
                     <td><span class="badge badge-${m.status === 'active' ? 'success' : 'secondary'}">${m.status === 'active' ? 'Aktif' : 'Nonaktif'}</span></td>
                     <td>
-                        <button class="btn-icon btn-primary" onclick="editMember('${m.id}')" title="Edit">
-                            <i class="fas fa-edit"></i></button>
-                        <button class="btn-icon btn-danger" onclick="deleteMember('${m.id}')" title="Hapus">
-                            <i class="fas fa-trash"></i></button>
+                        <div class="member-table-actions">
+                            <button class="btn-icon btn-primary" onclick="editMember('${m.id}')" title="Edit Data Anggota">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-icon btn-danger" onclick="deleteMember('${m.id}')" title="Hapus Anggota">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
                     </td>
                 </tr>
             `).join('');
@@ -487,37 +1001,6 @@
 
         window.editMember = (id) => openModal(id);
 
-        window.adjustPoint = async (id, delta) => {
-            // Get current member data
-            const memberResult = await memberService.getById(id);
-            if (!memberResult.success) {
-                showToast('Gagal mengambil data anggota', 'error');
-                return;
-            }
-
-            const currentPoints = memberResult.data.total_point || 0;
-            const newPoints = Math.max(0, currentPoints + delta);
-
-            // Show updating state
-            const pointEl = document.getElementById(`points-${id}`);
-            if (pointEl) pointEl.classList.add('updating');
-
-            // Update in database
-            const result = await memberService.update(id, { total_point: newPoints });
-
-            if (result.success) {
-                // Update UI instantly
-                if (pointEl) {
-                    pointEl.innerHTML = `<i class="fas fa-star"></i> ${formatNumber(newPoints)}`;
-                    pointEl.classList.remove('updating');
-                }
-                showToast(`Bintang ${delta > 0 ? 'ditambah' : 'dikurangi'}: ${memberResult.data.fullname} → ${formatNumber(newPoints)}`, 'success');
-            } else {
-                if (pointEl) pointEl.classList.remove('updating');
-                showToast(result.error || 'Gagal mengubah bintang', 'error');
-            }
-        };
-
         window.deleteMember = async (id) => {
             if (!await showConfirm('Yakin ingin menghapus anggota ini?')) return;
             
@@ -527,6 +1010,267 @@
                 loadMembers();
             } else {
                 showToast(result.error || 'Gagal menghapus', 'error');
+            }
+        };
+
+        // ============================================
+        // ADD POINT TRANSACTION LOGIC
+        // ============================================
+        window.openAddPointModal = async (memberId) => {
+            const memberResult = await memberService.getById(memberId);
+            if (!memberResult.success || !memberResult.data) {
+                showToast('Gagal mengambil data anggota', 'error');
+                return;
+            }
+
+            const m = memberResult.data;
+            addPointState.member = m;
+            addPointState.mode = 'product';
+            addPointState.selectedProduct = null;
+            addPointState.qty = 1;
+            addPointState.manualType = 'plus';
+            addPointState.manualPoint = 0;
+
+            document.getElementById('addPointMemberAvatar').src = m.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(m.fullname)}&background=e2e8f0&color=475569`;
+            document.getElementById('addPointMemberName').textContent = m.fullname;
+            document.getElementById('addPointMemberNumber').textContent = `Nomor: ${m.member_number}`;
+            document.getElementById('addPointCurrentPoints').innerHTML = `<i class="fas fa-star"></i> ${formatNumber(m.total_point || 0)}`;
+
+            elements.qtyInput.value = '1';
+            elements.manualPointInput.value = '';
+            elements.pointDescription.value = '';
+
+            setAddPointMode('product');
+
+            if (cachedProducts.length === 0) {
+                await loadProductsCache();
+            }
+            renderProductPicker();
+            updateLiveCalc();
+
+            elements.addPointModal.classList.add('show');
+        };
+
+        function setAddPointMode(mode) {
+            addPointState.mode = mode;
+            if (mode === 'product') {
+                elements.tabModeProduct.classList.add('active');
+                elements.tabModeManual.classList.remove('active');
+                elements.panelProductMode.style.display = 'block';
+                elements.panelManualMode.style.display = 'none';
+                if (addPointState.selectedProduct) {
+                    elements.pointDescription.value = `Pembelian ${addPointState.selectedProduct.name}${addPointState.qty > 1 ? ` (${addPointState.qty}x)` : ''}`;
+                } else {
+                    elements.pointDescription.value = '';
+                }
+            } else {
+                elements.tabModeManual.classList.add('active');
+                elements.tabModeProduct.classList.remove('active');
+                elements.panelProductMode.style.display = 'none';
+                elements.panelManualMode.style.display = 'block';
+                elements.pointDescription.value = 'Penambahan bintang manual';
+            }
+            updateLiveCalc();
+        }
+
+        function renderProductPicker() {
+            if (!cachedProducts || cachedProducts.length === 0) {
+                elements.productPickerGrid.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 24px; color: var(--color-text-secondary); background: var(--color-bg-alt); border-radius: 8px;">
+                        <i class="fas fa-box-open" style="font-size: 28px; margin-bottom: 8px; display: block; opacity: 0.5;"></i>
+                        Belum ada produk aktif di sistem.<br>
+                        <small>Gunakan mode "Input Manual" atau tambahkan produk di menu Kelola Produk.</small>
+                    </div>`;
+                return;
+            }
+
+            elements.productPickerGrid.innerHTML = cachedProducts.map(p => {
+                const isSelected = addPointState.selectedProduct && addPointState.selectedProduct.id === p.id;
+                return `
+                    <div class="product-pick-card ${isSelected ? 'selected' : ''}" onclick="selectProduct('${p.id}')">
+                        ${p.image
+                            ? `<img src="${p.image}" class="product-pick-thumb" onerror="this.outerHTML='<div class=\\\'product-pick-thumb\\\'><i class=\\\'fas fa-box\\\'></i></div>'">`
+                            : `<div class="product-pick-thumb"><i class="fas fa-box"></i></div>`
+                        }
+                        <div class="product-pick-info">
+                            <div class="product-pick-name" title="${p.name}">${p.name}</div>
+                            <div class="product-pick-pts">
+                                <i class="fas fa-star"></i> +${formatNumber(p.point_earned)} Bintang
+                            </div>
+                        </div>
+                        <div class="product-pick-check"><i class="fas fa-check-circle"></i></div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        window.selectProduct = (productId) => {
+            const product = cachedProducts.find(p => p.id === productId);
+            if (!product) return;
+
+            if (addPointState.selectedProduct && addPointState.selectedProduct.id === productId) {
+                addPointState.selectedProduct = null;
+                elements.pointDescription.value = '';
+            } else {
+                addPointState.selectedProduct = product;
+                elements.pointDescription.value = `Pembelian ${product.name}${addPointState.qty > 1 ? ` (${addPointState.qty}x)` : ''}`;
+            }
+
+            renderProductPicker();
+            updateLiveCalc();
+        };
+
+        function updateLiveCalc() {
+            const currentPts = addPointState.member ? (addPointState.member.total_point || 0) : 0;
+            let delta = 0;
+            let isPlus = true;
+
+            if (addPointState.mode === 'product') {
+                if (addPointState.selectedProduct) {
+                    delta = (addPointState.selectedProduct.point_earned || 0) * (addPointState.qty || 1);
+                } else {
+                    delta = 0;
+                }
+                isPlus = true;
+            } else {
+                const val = parseInt(elements.manualPointInput.value) || 0;
+                const type = document.querySelector('input[name="manualType"]:checked')?.value || 'plus';
+                delta = Math.max(0, val);
+                isPlus = type === 'plus';
+            }
+
+            const newTotal = isPlus ? (currentPts + delta) : Math.max(0, currentPts - delta);
+
+            document.getElementById('calcInitialPoints').innerHTML = `${formatNumber(currentPts)} ★`;
+            const deltaEl = document.getElementById('calcDeltaPoints');
+            const labelEl = document.getElementById('calcDeltaLabel');
+
+            if (delta === 0) {
+                deltaEl.textContent = '0 ★';
+                deltaEl.style.color = 'var(--color-text-secondary)';
+                labelEl.textContent = 'Perubahan Bintang:';
+            } else if (isPlus) {
+                deltaEl.textContent = `+${formatNumber(delta)} ★`;
+                deltaEl.style.color = '#059669';
+                labelEl.textContent = 'Bintang Ditambah:';
+            } else {
+                deltaEl.textContent = `-${formatNumber(delta)} ★`;
+                deltaEl.style.color = '#dc2626';
+                labelEl.textContent = 'Bintang Dikurang:';
+            }
+
+            const newTotalEl = document.getElementById('calcNewTotal');
+            newTotalEl.innerHTML = `${formatNumber(newTotal)} ★`;
+            newTotalEl.style.color = isPlus ? '#059669' : '#d97706';
+        }
+
+        async function saveAddPoint() {
+            if (!addPointState.member) return;
+
+            let delta = 0;
+            let type = 'plus';
+            let description = elements.pointDescription.value.trim();
+
+            if (addPointState.mode === 'product') {
+                if (!addPointState.selectedProduct) {
+                    showToast('Pilih salah satu produk terlebih dahulu', 'warning');
+                    return;
+                }
+                delta = (addPointState.selectedProduct.point_earned || 0) * (addPointState.qty || 1);
+                type = 'plus';
+                if (!description) {
+                    description = `Pembelian ${addPointState.selectedProduct.name}${addPointState.qty > 1 ? ` (${addPointState.qty}x)` : ''}`;
+                }
+            } else {
+                delta = parseInt(elements.manualPointInput.value) || 0;
+                type = document.querySelector('input[name="manualType"]:checked')?.value || 'plus';
+                if (delta <= 0) {
+                    showToast('Masukkan jumlah bintang lebih dari 0', 'warning');
+                    return;
+                }
+                if (!description) {
+                    description = type === 'plus' ? 'Penambahan bintang manual' : 'Pengurangan bintang manual';
+                }
+            }
+
+            elements.saveAddPointBtn.disabled = true;
+            elements.saveAddPointBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+
+            try {
+                const result = await memberService.addPointTransaction({
+                    memberId: addPointState.member.id,
+                    type: type,
+                    point: delta,
+                    description: description
+                });
+
+                if (result.success) {
+                    const finalTotal = result.data?.total_point ?? (type === 'plus' ? (addPointState.member.total_point + delta) : Math.max(0, addPointState.member.total_point - delta));
+                    showToast(`Bintang berhasil ditambahkan! ${addPointState.member.fullname} sekarang memiliki ${formatNumber(finalTotal)} bintang ⭐`, 'success');
+                    elements.addPointModal.classList.remove('show');
+                    loadMembers();
+                } else {
+                    showToast(result.error || 'Gagal menambahkan bintang', 'error');
+                }
+            } catch (err) {
+                console.error('Error add point:', err);
+                showToast('Terjadi kesalahan saat menyimpan', 'error');
+            }
+
+            elements.saveAddPointBtn.disabled = false;
+            elements.saveAddPointBtn.innerHTML = '<i class="fas fa-check-circle"></i> Simpan &amp; Tambah Bintang';
+        }
+
+        // ============================================
+        // POINT HISTORY LOGIC
+        // ============================================
+        window.openHistoryModal = async (memberId) => {
+            const memberResult = await memberService.getById(memberId);
+            if (!memberResult.success || !memberResult.data) {
+                showToast('Gagal mengambil data anggota', 'error');
+                return;
+            }
+
+            const m = memberResult.data;
+            document.getElementById('historyMemberAvatar').src = m.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(m.fullname)}&background=e2e8f0&color=475569`;
+            document.getElementById('historyMemberName').textContent = m.fullname;
+            document.getElementById('historyMemberNumber').textContent = `Nomor: ${m.member_number}`;
+            document.getElementById('historyCurrentPoints').innerHTML = `<i class="fas fa-star"></i> ${formatNumber(m.total_point || 0)}`;
+
+            const tbody = document.getElementById('historyTableBody');
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 24px;"><i class="fas fa-spinner fa-spin"></i> Memuat riwayat...</td></tr>';
+
+            elements.historyModal.classList.add('show');
+
+            const histResult = await memberService.getPointHistory(memberId);
+            if (histResult.success && histResult.data && histResult.data.length > 0) {
+                tbody.innerHTML = histResult.data.map(h => {
+                    const dateStr = new Date(h.created_at).toLocaleDateString('id-ID', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    const isPlus = h.type === 'plus';
+                    return `
+                        <tr>
+                            <td style="white-space: nowrap; color: var(--color-text-secondary); font-size: 12px;">${dateStr}</td>
+                            <td><strong>${h.description || (isPlus ? 'Penambahan Bintang' : 'Pengurangan Bintang')}</strong></td>
+                            <td style="text-align: right; font-weight: 700; color: ${isPlus ? '#059669' : '#dc2626'}; white-space: nowrap;">
+                                ${isPlus ? '+' : '-'}${formatNumber(h.point)} ★
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            } else {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="3" style="text-align: center; padding: 32px; color: var(--color-text-muted);">
+                            <i class="fas fa-history" style="font-size: 28px; margin-bottom: 8px; display: block; opacity: 0.4;"></i>
+                            Belum ada riwayat transaksi bintang untuk anggota ini.
+                        </td>
+                    </tr>`;
             }
         };
     </script>

@@ -4,6 +4,71 @@
    ============================================ */
 
 /* ============================================
+   BRAND LOGO - LIGHT & DARK TREATMENT
+   ============================================ */
+.brand-logo-container {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.brand-logo {
+    height: 34px;
+    width: auto;
+    object-fit: contain;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), filter 0.25s ease;
+    vertical-align: middle;
+}
+
+.brand-logo.logo-dark {
+    display: none !important;
+}
+
+.brand-logo.logo-light {
+    display: inline-block !important;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.12));
+}
+
+.sidebar-brand:hover .brand-logo.logo-light,
+.header-brand:hover .brand-logo.logo-light,
+.nav-brand:hover .brand-logo.logo-light,
+.brand-logo-container:hover .brand-logo.logo-light {
+    transform: scale(1.08);
+    filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.22));
+}
+
+/* Dark Mode Logo Treatment */
+[data-theme="dark"] .brand-logo.logo-light {
+    display: none !important;
+}
+
+[data-theme="dark"] .brand-logo.logo-dark {
+    display: inline-block !important;
+    filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.35)) drop-shadow(0 0 14px rgba(239, 68, 68, 0.4));
+}
+
+[data-theme="dark"] .sidebar-brand:hover .brand-logo.logo-dark,
+[data-theme="dark"] .header-brand:hover .brand-logo.logo-dark,
+[data-theme="dark"] .nav-brand:hover .brand-logo.logo-dark,
+[data-theme="dark"] .brand-logo-container:hover .brand-logo.logo-dark {
+    transform: scale(1.08);
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.65)) drop-shadow(0 0 22px rgba(239, 68, 68, 0.7));
+}
+
+.sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sidebar-brand .brand-logo {
+    height: 32px;
+}
+
+/* ============================================
    MEMBER CARD (Leaderboard) - SIMPLE & MODERN
    ============================================ */
 .member-card {
@@ -1096,3 +1161,235 @@ textarea.form-control {
         border-radius: 50% 50% 0 0 / 15px 15px 0 0;
     }
 }
+
+/* ============================================
+   UNIVERSAL DARK MODE OVERRIDES FOR UI CONTROLS
+   ============================================ */
+[data-theme="dark"] body {
+    background-color: var(--color-bg) !important;
+    color: var(--color-text-primary) !important;
+}
+
+/* Toolbar & Container */
+[data-theme="dark"] .toolbar {
+    background: var(--color-card) !important;
+    border: 1px solid #334155 !important;
+}
+
+[data-theme="dark"] .admin-header {
+    background: var(--color-card) !important;
+    border: 1px solid #334155 !important;
+    box-shadow: none !important;
+}
+
+[data-theme="dark"] .admin-sidebar {
+    background: var(--color-card) !important;
+    border-right: 1px solid #334155 !important;
+}
+
+[data-theme="dark"] .sidebar-header,
+[data-theme="dark"] .sidebar-footer {
+    border-color: #334155 !important;
+}
+
+/* Search Box & Inputs */
+[data-theme="dark"] .search-box {
+    background: #0f172a !important;
+    border: 1px solid #334155 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+
+[data-theme="dark"] .search-box input {
+    background: transparent !important;
+    color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .search-box input::placeholder {
+    color: #64748b !important;
+}
+
+[data-theme="dark"] .search-box i {
+    color: #94a3b8 !important;
+}
+
+/* Dropdown Filters & Selects */
+[data-theme="dark"] .filter-select,
+[data-theme="dark"] select.filter-select,
+[data-theme="dark"] .form-select,
+[data-theme="dark"] select.form-control,
+[data-theme="dark"] select {
+    background-color: #0f172a !important;
+    border: 1px solid #334155 !important;
+    color: #f1f5f9 !important;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") !important;
+}
+
+[data-theme="dark"] select option {
+    background-color: #1e293b !important;
+    color: #f1f5f9 !important;
+}
+
+/* Form Controls (Inputs, Textarea) */
+[data-theme="dark"] .form-control,
+[data-theme="dark"] input[type="text"],
+[data-theme="dark"] input[type="number"],
+[data-theme="dark"] input[type="email"],
+[data-theme="dark"] input[type="password"],
+[data-theme="dark"] textarea {
+    background-color: #0f172a !important;
+    border: 1px solid #334155 !important;
+    color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .form-control:focus,
+[data-theme="dark"] .search-box:focus-within,
+[data-theme="dark"] .filter-select:focus,
+[data-theme="dark"] select:focus,
+[data-theme="dark"] input:focus,
+[data-theme="dark"] textarea:focus {
+    border-color: var(--color-primary) !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25) !important;
+    background-color: #0f172a !important;
+}
+
+[data-theme="dark"] .form-label {
+    color: #f1f5f9 !important;
+}
+
+/* Modals */
+[data-theme="dark"] .modal-content {
+    background: #1e293b !important;
+    border: 1px solid #334155 !important;
+    color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .modal-header,
+[data-theme="dark"] .modal-footer {
+    border-color: #334155 !important;
+}
+
+[data-theme="dark"] .modal-title {
+    color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .modal-close {
+    color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .modal-close:hover {
+    color: #f1f5f9 !important;
+    background: #334155 !important;
+}
+
+/* Tables */
+[data-theme="dark"] .table-wrapper {
+    background: #1e293b !important;
+    border: 1px solid #334155 !important;
+}
+
+[data-theme="dark"] .table {
+    background: #1e293b !important;
+    color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .table thead {
+    background: #0f172a !important;
+}
+
+[data-theme="dark"] .table th {
+    color: #f1f5f9 !important;
+    border-bottom: 2px solid #334155 !important;
+    background: #0f172a !important;
+}
+
+[data-theme="dark"] .table td {
+    color: #cbd5e1 !important;
+    border-bottom: 1px solid #334155 !important;
+}
+
+[data-theme="dark"] .table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.04) !important;
+}
+
+/* Cards & Grid Items */
+[data-theme="dark"] .stat-card-admin,
+[data-theme="dark"] .banner-card,
+[data-theme="dark"] .reward-card {
+    background: #1e293b !important;
+    border: 1px solid #334155 !important;
+}
+
+[data-theme="dark"] .stat-card-header .stat-value {
+    color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .page-btn {
+    background: #1e293b !important;
+    color: #cbd5e1 !important;
+    border: 1px solid #334155 !important;
+}
+
+[data-theme="dark"] .page-btn.active {
+    background: var(--color-primary) !important;
+    color: #ffffff !important;
+}
+
+/* Custom Modals in Members (Product Picker & Calc) */
+[data-theme="dark"] .product-pick-item {
+    background: #0f172a !important;
+    border-color: #334155 !important;
+    color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .product-pick-item.selected {
+    border-color: #6366f1 !important;
+    background: rgba(99, 102, 241, 0.18) !important;
+}
+
+[data-theme="dark"] .calc-preview-box {
+    background: #0f172a !important;
+    border-color: #334155 !important;
+}
+
+[data-theme="dark"] .qty-btn {
+    background: #334155 !important;
+    border-color: #475569 !important;
+    color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .qty-input {
+    background: #0f172a !important;
+    border-color: #334155 !important;
+    color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .radio-card {
+    background: #0f172a !important;
+    border-color: #334155 !important;
+    color: #f1f5f9 !important;
+}
+
+/* Login Page Dark Theme */
+[data-theme="dark"] .login-page {
+    background: #0f172a !important;
+}
+
+[data-theme="dark"] .login-container {
+    background: #1e293b !important;
+    border: 1px solid #334155 !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
+}
+
+[data-theme="dark"] .login-title {
+    color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .login-subtitle {
+    color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .login-logo {
+    background: #0f172a !important;
+    border-color: #334155 !important;
+}
+

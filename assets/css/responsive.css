@@ -226,15 +226,19 @@
     /* Table */
     .table-wrapper {
         overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        width: 100%;
     }
 
     .table {
-        min-width: 600px;
+        min-width: 750px;
     }
 
     .table th,
     .table td {
-        padding: var(--spacing-sm);
+        white-space: nowrap;
+        vertical-align: middle;
+        padding: var(--spacing-sm) var(--spacing-md);
         font-size: var(--font-size-sm);
     }
 

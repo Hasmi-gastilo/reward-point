@@ -38,16 +38,27 @@
         }
 
         .login-logo {
-            width: 64px;
-            height: 64px;
+            width: 76px;
+            height: 76px;
             margin: 0 auto 16px;
-            background: #eef2ff;
-            color: #4f46e5;
-            border-radius: 16px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 28px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+        }
+
+        .login-logo .brand-logo {
+            height: 50px;
+            width: auto;
+        }
+
+        .login-logo:hover {
+            transform: scale(1.06);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
         }
 
         .login-title {
@@ -202,8 +213,9 @@
     <div class="login-page">
         <div class="login-container">
             <div class="login-header">
-                <div class="login-logo">
-                    <i class="fas fa-user-shield"></i>
+                <div class="login-logo brand-logo-container">
+                    <img src="../../assets/images/logo-light.png" alt="Logo" class="brand-logo logo-light">
+                    <img src="../../assets/images/logo-dark.png" alt="Logo" class="brand-logo logo-dark">
                 </div>
                 <h1 class="login-title">Admin Login</h1>
                 <p class="login-subtitle">Masuk ke dashboard administrator</p>

@@ -231,6 +231,69 @@ class MemberService {
             return 0;
         }
     }
+
+    /**
+     * Add point transaction and log to history
+     * @param {Object} params - { memberId, type, point, description }
+     * @returns {Promise<Object>}
+     */
+    async addPointTransaction({ memberId, type = 'plus', point, description = '' }) {
+        try {
+            const numPoints = parseInt(point);
+            if (isNaN(numPoints) || numPoints <= 0) {
+                throw new Error('Jumlah bintang harus lebih dari 0');
+            }
+
+            // 1. Insert into point_history
+            const { data: histData, error: histError } = await supabase
+                .from('point_history')
+                .insert([{
+                    member_id: memberId,
+                    type: type, // 'plus' or 'minus'
+                    point: numPoints,
+                    description: description || (type === 'plus' ? 'Penambahan bintang' : 'Pengurangan bintang')
+                }])
+                .select()
+                .single();
+
+            if (histError) throw histError;
+
+            // 2. Fetch updated member to get new total_point (trigger auto updates it)
+            const { data: updatedMember, error: memberError } = await supabase
+                .from('members')
+                .select('*')
+                .eq('id', memberId)
+                .single();
+
+            if (memberError) throw memberError;
+
+            return { success: true, data: updatedMember, history: histData };
+        } catch (error) {
+            console.error('Add point transaction error:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    /**
+     * Get point history for a member
+     * @param {string} memberId
+     * @returns {Promise<Object>}
+     */
+    async getPointHistory(memberId) {
+        try {
+            const { data, error } = await supabase
+                .from('point_history')
+                .select('*')
+                .eq('member_id', memberId)
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+            return { success: true, data };
+        } catch (error) {
+            console.error('Get point history error:', error);
+            return { success: false, error: error.message };
+        }
+    }
 }
 
 export default new MemberService();
