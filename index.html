@@ -114,13 +114,13 @@
 
         .brand-logo.logo-light {
             display: inline-block !important;
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.12));
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15)) drop-shadow(0 0 1px rgba(180, 83, 9, 0.3));
         }
 
         .header-brand:hover .brand-logo.logo-light,
         .brand-logo-container:hover .brand-logo.logo-light {
             transform: scale(1.08);
-            filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.22));
+            filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.22)) drop-shadow(0 0 2px rgba(180, 83, 9, 0.4));
         }
 
         /* Dark Mode Logo Treatment */
@@ -130,13 +130,13 @@
 
         [data-theme="dark"] .brand-logo.logo-dark {
             display: inline-block !important;
-            filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.35)) drop-shadow(0 0 14px rgba(239, 68, 68, 0.4));
+            filter: drop-shadow(0 0 6px rgba(255, 240, 0, 0.55)) drop-shadow(0 0 14px rgba(245, 158, 11, 0.4));
         }
 
         [data-theme="dark"] .header-brand:hover .brand-logo.logo-dark,
         [data-theme="dark"] .brand-logo-container:hover .brand-logo.logo-dark {
             transform: scale(1.08);
-            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.65)) drop-shadow(0 0 22px rgba(239, 68, 68, 0.7));
+            filter: drop-shadow(0 0 10px rgba(255, 240, 0, 0.8)) drop-shadow(0 0 22px rgba(245, 158, 11, 0.65));
         }
 
         .theme-toggle-btn {
