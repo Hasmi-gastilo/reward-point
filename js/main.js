@@ -21,6 +21,8 @@ const els = {
     leaderboardList: document.getElementById('leaderboardList'),
     memberSearchInput: document.getElementById('memberSearchInput'),
     clearMemberSearch: document.getElementById('clearMemberSearch'),
+    mobileMemberSearchInput: document.getElementById('mobileMemberSearchInput'),
+    clearMobileMemberSearch: document.getElementById('clearMobileMemberSearch'),
     leaderTabs: document.getElementById('leaderTabs'),
     mobileLbTabs: document.getElementById('mobileLbTabs'),
     lbTitleText: document.getElementById('lbTitleText'),
@@ -150,50 +152,71 @@ function setupEventListeners() {
     els.resetFilters.addEventListener('click', resetAllFilters);
     els.resetAll.addEventListener('click', resetAllFilters);
 
-    // Member search (debounced)
+    // Member search sync handler (Desktop & Mobile)
+    let memberSearchTimer;
+    const handleMemberSearch = (val) => {
+        clearTimeout(memberSearchTimer);
+        const trimmed = (val || '').trim();
+
+        // Sync both desktop and mobile search inputs
+        if (els.memberSearchInput && els.memberSearchInput.value !== val) {
+            els.memberSearchInput.value = val;
+        }
+        if (els.mobileMemberSearchInput && els.mobileMemberSearchInput.value !== val) {
+            els.mobileMemberSearchInput.value = val;
+        }
+
+        // Toggle clear buttons
+        if (els.clearMemberSearch) {
+            els.clearMemberSearch.style.display = trimmed ? 'flex' : 'none';
+        }
+        if (els.clearMobileMemberSearch) {
+            els.clearMobileMemberSearch.style.display = trimmed ? 'flex' : 'none';
+        }
+
+        memberSearchTimer = setTimeout(() => {
+            leaderboardState.search = trimmed;
+            applyLeaderboardFilter();
+        }, 200);
+    };
+
+    const clearAllMemberSearch = () => {
+        handleMemberSearch('');
+    };
+
     if (els.memberSearchInput) {
-        let memberSearchTimer;
-        els.memberSearchInput.addEventListener('input', (e) => {
-            clearTimeout(memberSearchTimer);
-            const val = e.target.value.trim();
-            if (els.clearMemberSearch) {
-                els.clearMemberSearch.style.display = val ? 'flex' : 'none';
-            }
-            memberSearchTimer = setTimeout(() => {
-                leaderboardState.search = val;
-                applyLeaderboardFilter();
-            }, 250);
-        });
+        els.memberSearchInput.addEventListener('input', (e) => handleMemberSearch(e.target.value));
+    }
+    if (els.mobileMemberSearchInput) {
+        els.mobileMemberSearchInput.addEventListener('input', (e) => handleMemberSearch(e.target.value));
     }
 
-    // Clear member search
     if (els.clearMemberSearch) {
-        els.clearMemberSearch.addEventListener('click', () => {
-            if (els.memberSearchInput) els.memberSearchInput.value = '';
-            els.clearMemberSearch.style.display = 'none';
-            leaderboardState.search = '';
-            applyLeaderboardFilter();
-        });
+        els.clearMemberSearch.addEventListener('click', clearAllMemberSearch);
+    }
+    if (els.clearMobileMemberSearch) {
+        els.clearMobileMemberSearch.addEventListener('click', clearAllMemberSearch);
     }
 
     // Leaderboard Tabs (Desktop & Mobile)
     const handleTabChange = (view) => {
+        if (!view) return;
         leaderboardState.view = view;
         syncLeaderboardTabs(view);
         applyLeaderboardFilter();
+        if (els.mobileLeaderboard) {
+            els.mobileLeaderboard.scrollLeft = 0;
+        }
     };
 
-    if (els.leaderTabs) {
-        els.leaderTabs.querySelectorAll('.leader-tab').forEach(tab => {
-            tab.addEventListener('click', () => handleTabChange(tab.dataset.view));
-        });
-    }
-
-    if (els.mobileLbTabs) {
-        els.mobileLbTabs.querySelectorAll('.mobile-lb-tab').forEach(tab => {
-            tab.addEventListener('click', () => handleTabChange(tab.dataset.view));
-        });
-    }
+    // Global delegation for leader tabs (guarantees click / tap works everywhere)
+    document.addEventListener('click', (e) => {
+        const tab = e.target.closest('.mobile-lb-tab, .leader-tab');
+        if (tab && tab.dataset.view) {
+            e.preventDefault();
+            handleTabChange(tab.dataset.view);
+        }
+    });
 
     // Mobile sidebar toggle
     els.filterToggle.addEventListener('click', () => {
@@ -313,17 +336,13 @@ function startBannerTimer() {
 // Leaderboard
 // ============================================
 function syncLeaderboardTabs(view) {
-    if (els.leaderTabs) {
-        els.leaderTabs.querySelectorAll('.leader-tab').forEach(tab => {
-            tab.classList.toggle('active', tab.dataset.view === view);
-        });
-    }
-    if (els.mobileLbTabs) {
-        els.mobileLbTabs.querySelectorAll('.mobile-lb-tab').forEach(tab => {
-            tab.classList.toggle('active', tab.dataset.view === view);
-        });
-    }
-    const title = view === 'all' ? 'Semua Anggota' : 'Top Bintang';
+    document.querySelectorAll('.leader-tab, .mobile-lb-tab').forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.view === view);
+    });
+    const count = allLeaderboardMembers.length;
+    const title = view === 'all'
+        ? (count > 0 ? `Semua Anggota (${count})` : 'Semua Anggota')
+        : 'Top Bintang';
     if (els.lbTitleText) els.lbTitleText.textContent = title;
     if (els.mobileLbTitleText) els.mobileLbTitleText.textContent = title;
 }
@@ -338,14 +357,20 @@ async function loadLeaderboard() {
                 ...m,
                 overallRank: i + 1
             }));
+            // Update "Semua" tab button label with total count
+            document.querySelectorAll('.leader-tab[data-view="all"], .mobile-lb-tab[data-view="all"]').forEach(btn => {
+                btn.textContent = `Semua (${allLeaderboardMembers.length})`;
+            });
             applyLeaderboardFilter();
         } else {
             renderLeaderboard([]);
         }
     } catch (error) {
         console.error('Leaderboard error:', error);
-        els.leaderboardList.innerHTML =
-            '<p style="text-align:center;padding:20px;color:#94a3b8;font-size:13px;">Gagal memuat data</p>';
+        if (els.leaderboardList) {
+            els.leaderboardList.innerHTML =
+                '<p style="text-align:center;padding:20px;color:#94a3b8;font-size:13px;">Gagal memuat data</p>';
+        }
     }
 }
 
