@@ -346,10 +346,94 @@
         }
 
         /* --- Leaderboard --- */
+        .leader-tabs {
+            display: inline-flex;
+            background: #f1f5f9;
+            border-radius: 20px;
+            padding: 2px;
+            gap: 2px;
+        }
+
+        .leader-tab {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 16px;
+            color: #64748b;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .leader-tab:hover {
+            color: #1e293b;
+        }
+
+        .leader-tab.active {
+            background: #fff;
+            color: #4f46e5;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+
+        .leader-search-box {
+            position: relative;
+            padding: 0 12px 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .leader-search-box i.fa-search {
+            position: absolute;
+            left: 22px;
+            font-size: 11px;
+            color: #94a3b8;
+            pointer-events: none;
+        }
+
+        .leader-search-box input {
+            width: 100%;
+            padding: 6px 26px 6px 28px;
+            font-size: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: #f8fafc;
+            color: #1e293b;
+            outline: none;
+            transition: all 0.15s ease;
+        }
+
+        .leader-search-box input:focus {
+            background: #fff;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.12);
+        }
+
+        .leader-search-clear {
+            position: absolute;
+            right: 20px;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            background: #cbd5e1;
+            color: #fff;
+            border-radius: 50%;
+            font-size: 9px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .leader-search-clear:hover {
+            background: #94a3b8;
+        }
+
         .leader-list {
             padding: 0 8px 12px;
-            max-height: 220px;
-            /* Sengaja dibuat lebih pendek agar cepat bisa di-scroll */
+            max-height: 250px;
+            /* Lebih leluasa untuk scroll banyak anggota */
             overflow-y: auto;
         }
 
@@ -828,6 +912,32 @@
             align-items: center;
             justify-content: space-between;
             margin-bottom: 10px;
+        }
+
+        .mobile-lb-tabs {
+            display: inline-flex;
+            background: #f1f5f9;
+            border-radius: 20px;
+            padding: 2px;
+            gap: 2px;
+        }
+
+        .mobile-lb-tab {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 16px;
+            color: #64748b;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .mobile-lb-tab.active {
+            background: #fff;
+            color: #4f46e5;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
         }
 
         .mobile-lb-title {
@@ -1423,6 +1533,65 @@
             color: #f9fafb;
         }
 
+        [data-theme="dark"] .leader-tabs,
+        [data-theme="dark"] .mobile-lb-tabs {
+            background: #1f2937;
+        }
+
+        [data-theme="dark"] .leader-tab,
+        [data-theme="dark"] .mobile-lb-tab {
+            color: #94a3b8;
+        }
+
+        [data-theme="dark"] .leader-tab:hover,
+        [data-theme="dark"] .mobile-lb-tab:hover {
+            color: #f3f4f6;
+        }
+
+        [data-theme="dark"] .leader-tab.active,
+        [data-theme="dark"] .mobile-lb-tab.active {
+            background: #374151;
+            color: #818cf8;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        [data-theme="dark"] .leader-search-box input {
+            background: #1f2937;
+            border-color: #374151;
+            color: #f3f4f6;
+        }
+
+        [data-theme="dark"] .leader-search-box input:focus {
+            background: #111827;
+            border-color: #6366f1;
+        }
+
+        [data-theme="dark"] .leader-search-clear {
+            background: #4b5563;
+            color: #cbd5e1;
+        }
+
+        [data-theme="dark"] .leader-item:hover {
+            background: #1f2937;
+        }
+
+        [data-theme="dark"] .leader-name {
+            color: #f3f4f6;
+        }
+
+        [data-theme="dark"] .mobile-lb-title {
+            color: #f9fafb;
+        }
+
+        [data-theme="dark"] .mobile-lb-card {
+            background: #111827;
+            border-color: #1f2937;
+        }
+
+        [data-theme="dark"] .mobile-lb-name {
+            color: #f3f4f6;
+        }
+
         [data-theme="dark"] .leaderboard-item {
             background: #1f2937;
             border-color: #374151;
@@ -1823,7 +1992,16 @@
             <div class="sidebar-card">
                 <div class="sidebar-card-header">
                     <h2 class="sidebar-card-title"><i class="fas fa-trophy"
-                            style="color: var(--color-secondary); margin-right: 8px;"></i>Top Bintang</h2>
+                            style="color: var(--color-secondary); margin-right: 8px;"></i><span id="lbTitleText">Top Bintang</span></h2>
+                    <div class="leader-tabs" id="leaderTabs">
+                        <button type="button" class="leader-tab active" data-view="top10">Top 10</button>
+                        <button type="button" class="leader-tab" data-view="all">Semua</button>
+                    </div>
+                </div>
+                <div class="leader-search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="memberSearchInput" placeholder="Cari nama anggota..." autocomplete="off">
+                    <button type="button" class="leader-search-clear" id="clearMemberSearch" style="display:none;" title="Hapus"><i class="fas fa-times"></i></button>
                 </div>
                 <div class="leader-list" id="leaderboardList">
                     <div class="skeleton-leader"></div>
@@ -1876,7 +2054,11 @@
             <div class="mobile-leaderboard">
                 <div class="mobile-lb-header">
                     <span class="mobile-lb-title"><i class="fas fa-trophy"
-                            style="color: var(--color-secondary); margin-right: 4px;"></i>Top Bintang</span>
+                            style="color: var(--color-secondary); margin-right: 4px;"></i><span id="mobileLbTitleText">Top Bintang</span></span>
+                    <div class="mobile-lb-tabs" id="mobileLbTabs">
+                        <button type="button" class="mobile-lb-tab active" data-view="top10">Top 10</button>
+                        <button type="button" class="mobile-lb-tab" data-view="all">Semua</button>
+                    </div>
                 </div>
                 <div class="mobile-lb-scroll" id="mobileLeaderboard">
                     <div class="mobile-lb-empty">Memuat...</div>

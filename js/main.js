@@ -19,6 +19,12 @@ import { formatNumber } from './utils/helpers.js';
 // ============================================
 const els = {
     leaderboardList: document.getElementById('leaderboardList'),
+    memberSearchInput: document.getElementById('memberSearchInput'),
+    clearMemberSearch: document.getElementById('clearMemberSearch'),
+    leaderTabs: document.getElementById('leaderTabs'),
+    mobileLbTabs: document.getElementById('mobileLbTabs'),
+    lbTitleText: document.getElementById('lbTitleText'),
+    mobileLbTitleText: document.getElementById('mobileLbTitleText'),
     rewardsGrid: document.getElementById('rewardsGrid'),
     categoryList: document.getElementById('categoryList'),
     searchInput: document.getElementById('searchInput'),
@@ -44,9 +50,15 @@ const els = {
 // State
 // ============================================
 let allRewards = [];
+let allLeaderboardMembers = [];
 let bannerSlides = [];
 let currentBannerIndex = 0;
 let bannerTimer = null;
+
+const leaderboardState = {
+    view: 'top10', // 'top10' | 'all'
+    search: ''
+};
 
 const state = {
     search: '',
@@ -137,6 +149,51 @@ function setupEventListeners() {
     // Reset buttons
     els.resetFilters.addEventListener('click', resetAllFilters);
     els.resetAll.addEventListener('click', resetAllFilters);
+
+    // Member search (debounced)
+    if (els.memberSearchInput) {
+        let memberSearchTimer;
+        els.memberSearchInput.addEventListener('input', (e) => {
+            clearTimeout(memberSearchTimer);
+            const val = e.target.value.trim();
+            if (els.clearMemberSearch) {
+                els.clearMemberSearch.style.display = val ? 'flex' : 'none';
+            }
+            memberSearchTimer = setTimeout(() => {
+                leaderboardState.search = val;
+                applyLeaderboardFilter();
+            }, 250);
+        });
+    }
+
+    // Clear member search
+    if (els.clearMemberSearch) {
+        els.clearMemberSearch.addEventListener('click', () => {
+            if (els.memberSearchInput) els.memberSearchInput.value = '';
+            els.clearMemberSearch.style.display = 'none';
+            leaderboardState.search = '';
+            applyLeaderboardFilter();
+        });
+    }
+
+    // Leaderboard Tabs (Desktop & Mobile)
+    const handleTabChange = (view) => {
+        leaderboardState.view = view;
+        syncLeaderboardTabs(view);
+        applyLeaderboardFilter();
+    };
+
+    if (els.leaderTabs) {
+        els.leaderTabs.querySelectorAll('.leader-tab').forEach(tab => {
+            tab.addEventListener('click', () => handleTabChange(tab.dataset.view));
+        });
+    }
+
+    if (els.mobileLbTabs) {
+        els.mobileLbTabs.querySelectorAll('.mobile-lb-tab').forEach(tab => {
+            tab.addEventListener('click', () => handleTabChange(tab.dataset.view));
+        });
+    }
 
     // Mobile sidebar toggle
     els.filterToggle.addEventListener('click', () => {
@@ -255,11 +312,35 @@ function startBannerTimer() {
 // ============================================
 // Leaderboard
 // ============================================
+function syncLeaderboardTabs(view) {
+    if (els.leaderTabs) {
+        els.leaderTabs.querySelectorAll('.leader-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.view === view);
+        });
+    }
+    if (els.mobileLbTabs) {
+        els.mobileLbTabs.querySelectorAll('.mobile-lb-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.view === view);
+        });
+    }
+    const title = view === 'all' ? 'Semua Anggota' : 'Top Bintang';
+    if (els.lbTitleText) els.lbTitleText.textContent = title;
+    if (els.mobileLbTitleText) els.mobileLbTitleText.textContent = title;
+}
+
 async function loadLeaderboard() {
     try {
-        const result = await memberService.getLeaderboard(10);
-        if (result.success) {
-            renderLeaderboard(result.data);
+        // Ambil semua anggota aktif untuk mendukung filter Top 10 / Semua dan Pencarian
+        const result = await memberService.getAll({ status: 'active', limit: 1000 });
+        if (result.success && result.data) {
+            const sorted = result.data.sort((a, b) => (b.total_point || 0) - (a.total_point || 0));
+            allLeaderboardMembers = sorted.map((m, i) => ({
+                ...m,
+                overallRank: i + 1
+            }));
+            applyLeaderboardFilter();
+        } else {
+            renderLeaderboard([]);
         }
     } catch (error) {
         console.error('Leaderboard error:', error);
@@ -268,28 +349,48 @@ async function loadLeaderboard() {
     }
 }
 
+function applyLeaderboardFilter() {
+    let filtered = [...allLeaderboardMembers];
+
+    if (leaderboardState.search) {
+        const q = leaderboardState.search.toLowerCase();
+        filtered = filtered.filter(m =>
+            (m.fullname && m.fullname.toLowerCase().includes(q)) ||
+            (m.member_number && m.member_number.toLowerCase().includes(q))
+        );
+    } else if (leaderboardState.view === 'top10') {
+        filtered = filtered.slice(0, 10);
+    }
+
+    renderLeaderboard(filtered);
+}
+
 function renderLeaderboard(members) {
     if (!members || members.length === 0) {
+        const emptyMsg = leaderboardState.search
+            ? `Tidak ada anggota bernama "${leaderboardState.search}"`
+            : 'Belum ada data anggota';
         els.leaderboardList.innerHTML =
-            '<p style="text-align:center;padding:20px;color:#94a3b8;font-size:13px;">Belum ada data anggota</p>';
+            `<p style="text-align:center;padding:20px;color:#94a3b8;font-size:12px;">${emptyMsg}</p>`;
         if (els.mobileLeaderboard) {
-            els.mobileLeaderboard.innerHTML = '<div class="mobile-lb-empty">Belum ada data</div>';
+            els.mobileLeaderboard.innerHTML = `<div class="mobile-lb-empty">${emptyMsg}</div>`;
         }
         return;
     }
 
     // Desktop sidebar
-    els.leaderboardList.innerHTML = members.map((m, i) => {
-        const rankClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : 'normal';
+    els.leaderboardList.innerHTML = members.map((m) => {
+        const rank = m.overallRank || 1;
+        const rankClass = rank === 1 ? 'gold' : rank === 2 ? 'silver' : rank === 3 ? 'bronze' : 'normal';
         return `
         <div class="leader-item">
-            <div class="leader-rank ${rankClass}">${i + 1}</div>
+            <div class="leader-rank ${rankClass}">${rank}</div>
             <img class="leader-avatar"
                  src="${m.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(m.fullname)}&background=e2e8f0&color=475569`}"
                  alt="${m.fullname}"
                  onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(m.fullname)}&background=e2e8f0&color=475569'">
             <div class="leader-info">
-                <div class="leader-name">${m.fullname}</div>
+                <div class="leader-name" title="${m.fullname}">${m.fullname}</div>
                 <div class="leader-pts"><i class="fas fa-star"></i> ${formatNumber(m.total_point)}</div>
             </div>
         </div>`;
@@ -297,11 +398,12 @@ function renderLeaderboard(members) {
 
     // Mobile horizontal scroll
     if (els.mobileLeaderboard) {
-        els.mobileLeaderboard.innerHTML = members.map((m, i) => {
-            const rankEmoji = i === 0 ? '<i class="fas fa-crown" style="color: #FFD700; font-size: 1.2em;"></i>' :
-                              i === 1 ? '<i class="fas fa-medal" style="color: #C0C0C0; font-size: 1.2em;"></i>' :
-                              i === 2 ? '<i class="fas fa-medal" style="color: #CD7F32; font-size: 1.2em;"></i>' :
-                              `#${i + 1}`;
+        els.mobileLeaderboard.innerHTML = members.map((m) => {
+            const rank = m.overallRank || 1;
+            const rankEmoji = rank === 1 ? '<i class="fas fa-crown" style="color: #FFD700; font-size: 1.2em;"></i>' :
+                              rank === 2 ? '<i class="fas fa-medal" style="color: #C0C0C0; font-size: 1.2em;"></i>' :
+                              rank === 3 ? '<i class="fas fa-medal" style="color: #CD7F32; font-size: 1.2em;"></i>' :
+                              `#${rank}`;
             return `
             <div class="mobile-lb-card">
                 <div class="mobile-lb-rank">${rankEmoji}</div>
@@ -310,7 +412,7 @@ function renderLeaderboard(members) {
                      alt="${m.fullname}"
                      onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(m.fullname)}&background=e2e8f0&color=475569'">
                 <div class="mobile-lb-info">
-                    <div class="mobile-lb-name">${m.fullname}</div>
+                    <div class="mobile-lb-name" title="${m.fullname}">${m.fullname}</div>
                     <div class="mobile-lb-pts"><i class="fas fa-star"></i> ${formatNumber(m.total_point)}</div>
                 </div>
             </div>`;
